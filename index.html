@@ -3,16 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>자동차 유지비 에이전트</title>
+    
+    <title>2026 자동차 유지비 계산기 - BMW, 아반떼, 그랜저 월 유지비 AI 분석</title>
+    
+    <meta name="description" content="내 차 유지비, 엑셀로 계산하지 마세요. 차종, 연식, 나이만 입력하면 AI가 보험료, 세금, 유류비, 정비비까지 1분 만에 정밀하게 분석해드립니다. 무료 자동차 유지비 계산기.">
+    
+    <meta name="keywords" content="자동차 유지비 계산기, 중고차 유지비, 첫차 추천, 사회초년생 자동차, BMW 유지비, 아반떼 유지비, 자동차 보험료 계산, 카푸어 판독기">
+    <meta name="author" content="AI Car Agent">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="🚗 내 차 유지비 얼마일까? AI 정밀 분석">
+    <meta property="og:description" content="보험료, 세금, 기름값, 숨겨진 정비비까지! AI가 당신의 현실적인 월 유지비를 계산해드립니다.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop"> <meta property="og:url" content="https://ai-car-calculator.vercel.app/">
+    
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ai-car-calculator.vercel.app/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AI 자동차 유지비 계산기",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KRW"
+      },
+      "description": "사용자의 나이, 운전 경력, 차량 모델을 기반으로 보험료, 유류비, 정비비를 AI로 분석하여 월 유지비를 계산해주는 도구입니다."
+    }
+    </script>
+
     <style>
-        body { font-family: 'Pretendard', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f7; }
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f7; color: #1d1d1f; }
         .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h1 { text-align: center; color: #1d1d1f; margin-bottom: 30px; }
+        h1 { text-align: center; color: #1d1d1f; margin-bottom: 30px; font-size: 26px; font-weight: 800; }
         
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: #86868b; font-size: 14px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        input:focus { outline: none; border-color: #0071e3; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; appearance: none; }
+        input:focus, select:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
         
         button { width: 100%; padding: 16px; background: #0071e3; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 17px; margin-top: 10px; transition: background 0.2s; }
         button:hover { background: #0077ed; }
@@ -22,91 +53,103 @@
         .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
         .detail-row:last-child { border-bottom: none; }
         
-        /* 연료 타입 배지 스타일 */
         .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px; vertical-align: middle; }
         .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } 
         .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } 
 
-        .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; }
+        .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; word-break: keep-all; }
         .item-list { list-style: none; padding: 0; }
         .item-list li { background: #f9f9f9; padding: 12px; margin-bottom: 8px; border-radius: 8px; font-size: 14px; }
         .loading { text-align: center; display: none; padding: 20px; }
+        
+        /* Footer for SEO internal linking structure */
+        footer { text-align: center; margin-top: 40px; color: #86868b; font-size: 12px; padding-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <h1>🚗 내 차 유지비 얼마일까?</h1>
+    <header>
+        <h1>🚗 내 차 유지비 얼마일까?</h1>
+        <p style="text-align: center; color: #666; font-size: 14px; margin-top: -20px; margin-bottom: 30px;">AI가 분석하는 보험료, 세금, 정비비 리포트</p>
+    </header>
     
-    <div class="card">
-        <div class="input-group">
-            <label>차량 모델명 <span style="color:red">*</span></label>
-            <input type="text" id="carModel" placeholder="예: BMW 530i, 제네시스 G70">
-        </div>
-        <div class="input-group">
-            <label>차량 연식 <span style="color:red">*</span></label>
-            <input type="number" id="carYear" placeholder="2023" value="2023">
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <div class="input-group" style="flex: 1;">
-                <label>출생년도 <span style="color:red">*</span></label>
-                <input type="number" id="birthYear" placeholder="1995" value="1995">
-            </div>
-            <div class="input-group" style="flex: 1;">
-                <label>운전 경력 <span style="color:red">*</span></label>
-                <select id="drivingExp">
-                    <option value="0">신규 (0년)</option>
-                    <option value="1">1~2년</option>
-                    <option value="3">3년 이상</option>
-                </select>
-            </div>
-        </div>
-        <button onclick="calculate()">💰 AI 정밀 유지비 분석 시작</button>
-    </div>
-
-    <div id="loading" class="loading">
-        <p>자동차 에이전트가 고객님의 조건과 차량 데이터를<br>정밀 분석 중입니다...🕵️‍♂️</p>
-    </div>
-
-    <div id="result" style="display:none;">
-        <div class="card" style="border: 2px solid #0071e3; background: #f0f7ff;">
-            <div style="text-align: center;">
-                <span style="font-size: 14px; color: #0071e3; font-weight: bold;">월 예상 유지비</span>
-                <div class="price-tag" id="monthlyTotal">0원</div>
-                <span style="font-size: 13px; color: #666;">(할부금 제외 순수 유지비)</span>
-            </div>
-        </div>
-
+    <main>
         <div class="card">
-            <h3>📊 1년 상세 지출 명세서</h3>
-            <div class="detail-row">
-                <span>⛽ 연간 주유비 (12000km) <span id="fuelBadge"></span></span>
-                <span id="fuelCost" style="font-weight:bold;">0원</span>
+            <div class="input-group">
+                <label for="carModel">차량 모델명 <span style="color:red">*</span></label>
+                <input type="text" id="carModel" placeholder="예: BMW 520d, 아반떼 CN7, 제네시스 G80">
             </div>
-            <div class="detail-row">
-                <span>🏛 자동차세 (할인적용)</span>
-                <span id="taxCost" style="font-weight:bold;">0원</span>
+            <div class="input-group">
+                <label for="carYear">차량 연식 <span style="color:red">*</span></label>
+                <input type="number" id="carYear" placeholder="2023" value="2023">
             </div>
-            <div class="detail-row">
-                <span>🛡 자동차 보험료(예상)</span>
-                <span id="insCost" style="font-weight:bold; color: #0071e3;">0원</span>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex: 1;">
+                    <label for="birthYear">출생년도 <span style="color:red">*</span></label>
+                    <input type="number" id="birthYear" placeholder="1995" value="1995">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label for="drivingExp">운전 경력 <span style="color:red">*</span></label>
+                    <select id="drivingExp">
+                        <option value="0">신규 (0년)</option>
+                        <option value="1">1~2년</option>
+                        <option value="3">3년 이상</option>
+                    </select>
+                </div>
             </div>
-            <div class="detail-row">
-                <span>🔧 정비 예비비</span>
-                <span id="repairCost" style="font-weight:bold;">0원</span>
-            </div>
+            <button onclick="calculate()">💰 AI 정밀 유지비 분석 시작</button>
         </div>
 
-        <div class="card">
-            <h3>🔩 주요 소모품 교체 비용</h3>
-            <ul id="maintenanceList" class="item-list"></ul>
+        <div id="loading" class="loading">
+            <p><strong>자동차 AI 에이전트</strong>가 고객님의 조건과<br>실시간 유가/보험 데이터를 분석 중입니다...🕵️‍♂️</p>
         </div>
 
-        <div class="card">
-            <h3>⚠️ 구매 전 필독 (고질병)</h3>
-            <div id="riskBox" class="risk-box"></div>
-            <p id="aiComment" style="margin-top:15px; font-size:14px; color:#555; font-style:italic; line-height: 1.5;"></p>
+        <div id="result" style="display:none;">
+            <div class="card" style="border: 2px solid #0071e3; background: #f0f7ff;">
+                <div style="text-align: center;">
+                    <span style="font-size: 14px; color: #0071e3; font-weight: bold;">월 예상 유지비</span>
+                    <div class="price-tag" id="monthlyTotal">0원</div>
+                    <span style="font-size: 13px; color: #666;">(할부금 제외 순수 유지비)</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 1년 상세 지출 명세서</h3>
+                <div class="detail-row">
+                    <span>⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
+                    <span id="fuelCost" style="font-weight:bold;">0원</span>
+                </div>
+                <div class="detail-row">
+                    <span>🏛 자동차세 (연납할인 미적용)</span>
+                    <span id="taxCost" style="font-weight:bold;">0원</span>
+                </div>
+                <div class="detail-row">
+                    <span>🛡 자동차 보험료(예상)</span>
+                    <span id="insCost" style="font-weight:bold; color: #0071e3;">0원</span>
+                </div>
+                <div class="detail-row">
+                    <span>🔧 정비/소모품 예비비</span>
+                    <span id="repairCost" style="font-weight:bold;">0원</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔩 주요 소모품 교체 비용 (예상)</h3>
+                <ul id="maintenanceList" class="item-list"></ul>
+            </div>
+
+            <div class="card">
+                <h3>⚠️ 구매 전 필독 (고질병 리포트)</h3>
+                <div id="riskBox" class="risk-box"></div>
+                <p id="aiComment" style="margin-top:15px; font-size:14px; color:#555; font-style:italic; line-height: 1.5;"></p>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 AI Car Calculator. All rights reserved.</p>
+        <p>본 결과는 AI 추정치이며 실제 비용과 차이가 있을 수 있습니다.</p>
+    </footer>
 
     <script>
         async function calculate() {
@@ -120,7 +163,7 @@
             const birthYearVal = document.getElementById('birthYear').value;
             const drivingExp = document.getElementById('drivingExp').value;
             
-            // === [유효성 검사 로직 시작] ===
+            // === [유효성 검사 로직] ===
             
             // 1. 차량 모델명 필수 체크
             if (!carModel) {
@@ -134,35 +177,34 @@
             const birthYear = parseInt(birthYearVal);
             const age = currentYear - birthYear;
 
-            // 2. 차량 연식 검증 (1950년 ~ 현재+1년)
-            // 보통 신차는 내년형 모델이 미리 나오므로 +1년까지 허용
+            // 2. 차량 연식 검증
             if (isNaN(carYear) || carYear < 1950 || carYear > currentYear + 1) {
                 alert(`📅 차량 연식을 확인해주세요.\n(1950년 ~ ${currentYear + 1}년 사이만 가능)`);
                 document.getElementById('carYear').focus();
                 return;
             }
 
-            // 3. 나이 검증 (만 18세 이상 운전 가능)
+            // 3. 나이 검증
             if (isNaN(birthYear) || age < 18) {
                 alert("🔞 만 18세 미만은 운전면허를 취득할 수 없어\n정확한 계산이 불가능합니다.");
                 document.getElementById('birthYear').focus();
                 return;
             }
 
-            // 4. 나이 상한 검증 (100세 초과 방지)
+            // 4. 나이 상한 검증
             if (age > 100) {
                 alert("👴 100세 이상으로 입력되었습니다.\n정확한 출생년도를 확인해주세요.");
                 document.getElementById('birthYear').focus();
                 return;
             }
             
-            // === [유효성 검사 통과 후 실행] ===
+            // === [유효성 검사 통과] ===
 
             btn.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
 
-            // [중요] 본인의 n8n Webhook URL로 교체하세요!
+            // [중요] 본인의 n8n Webhook URL
             const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc'; 
 
             try {
@@ -187,12 +229,16 @@
                 document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
                 document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
 
-                // 배지 처리
+                // 배지 처리 (수정된 경유 로직 반영)
                 const badgeSpan = document.getElementById('fuelBadge');
                 const fuelGrade = data.specs.fuel_grade || "일반유"; 
                 
+                // 경유, 고급유, 일반유 구분
                 if(fuelGrade.includes("고급") || fuelGrade.includes("Premium")) {
                     badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
+                } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤")) {
+                    // 경유는 일단 일반유 배지 스타일을 쓰되 텍스트 변경 (필요 시 badge-diesel 클래스 추가 가능)
+                    badgeSpan.innerHTML = `<span class="badge badge-regular" style="color:#2d3436; border-color:#b2bec3; background:#dfe6e9;">⛽경유</span>`;
                 } else {
                     badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
                 }
@@ -227,4 +273,3 @@
     </script>
 </body>
 </html>
-
