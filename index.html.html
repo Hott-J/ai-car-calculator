@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 카 마스터 - 유지비 분석기</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f7; }
+        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h1 { text-align: center; color: #1d1d1f; margin-bottom: 30px; }
+        
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #86868b; font-size: 14px; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input:focus { outline: none; border-color: #0071e3; }
+        
+        button { width: 100%; padding: 16px; background: #0071e3; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 17px; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background: #0077ed; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        .price-tag { font-size: 32px; font-weight: 800; color: #1d1d1f; text-align: center; margin: 10px 0; }
+        .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .detail-row:last-child { border-bottom: none; }
+        
+        /* 연료 타입 배지 스타일 (사이즈 조절) */
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px; vertical-align: middle; }
+        .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } /* 고급유 */
+        .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 일반유 */
+
+        .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; }
+        .item-list { list-style: none; padding: 0; }
+        .item-list li { background: #f9f9f9; padding: 12px; margin-bottom: 8px; border-radius: 8px; font-size: 14px; }
+        .loading { text-align: center; display: none; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>🚗 내 차 유지비 얼마일까?</h1>
+    
+    <div class="card">
+        <div class="input-group">
+            <label>차량 모델명</label>
+            <input type="text" id="carModel" placeholder="예: BMW 530i, 제네시스 G70">
+        </div>
+        <div class="input-group">
+            <label>차량 연식</label>
+            <input type="number" id="carYear" placeholder="2023" value="2023">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 1;">
+                <label>출생년도</label>
+                <input type="number" id="birthYear" placeholder="1995" value="1995">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>운전 경력</label>
+                <select id="drivingExp">
+                    <option value="0">신규 (0년)</option>
+                    <option value="1">1~2년</option>
+                    <option value="3">3년 이상</option>
+                </select>
+            </div>
+        </div>
+        <button onclick="calculate()">💰 AI 정밀 유지비 분석 시작</button>
+    </div>
+
+    <div id="loading" class="loading">
+        <p>AI 명장이 고객님의 조건과 차량 데이터를<br>정밀 분석 중입니다...🕵️‍♂️</p>
+    </div>
+
+    <div id="result" style="display:none;">
+        <div class="card" style="border: 2px solid #0071e3; background: #f0f7ff;">
+            <div style="text-align: center;">
+                <span style="font-size: 14px; color: #0071e3; font-weight: bold;">월 예상 유지비</span>
+                <div class="price-tag" id="monthlyTotal">0원</div>
+                <span style="font-size: 13px; color: #666;">(할부금 제외 순수 유지비)</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📊 1년 상세 지출 명세서</h3>
+            <div class="detail-row">
+                <span>⛽ 연간 주유비 <span id="fuelBadge"></span></span>
+                <span id="fuelCost" style="font-weight:bold;">0원</span>
+            </div>
+            <div class="detail-row">
+                <span>🏛 자동차세 (할인적용)</span>
+                <span id="taxCost" style="font-weight:bold;">0원</span>
+            </div>
+            <div class="detail-row">
+                <span>🛡 자동차 보험료(예상)</span>
+                <span id="insCost" style="font-weight:bold; color: #0071e3;">0원</span>
+            </div>
+            <div class="detail-row">
+                <span>🔧 정비 예비비</span>
+                <span id="repairCost" style="font-weight:bold;">0원</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🔩 주요 소모품 교체 비용</h3>
+            <ul id="maintenanceList" class="item-list"></ul>
+        </div>
+
+        <div class="card">
+            <h3>⚠️ 구매 전 필독 (고질병)</h3>
+            <div id="riskBox" class="risk-box"></div>
+            <p id="aiComment" style="margin-top:15px; font-size:14px; color:#555; font-style:italic; line-height: 1.5;"></p>
+        </div>
+    </div>
+
+    <script>
+        async function calculate() {
+            const btn = document.querySelector('button');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            const carModel = document.getElementById('carModel').value;
+            const carYear = document.getElementById('carYear').value;
+            const birthYear = document.getElementById('birthYear').value;
+            const drivingExp = document.getElementById('drivingExp').value;
+
+            // [중요] 본인의 n8n Webhook URL로 교체하세요!
+            const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc'; 
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        car_model: carModel, 
+                        car_year: parseInt(carYear),
+                        birth_year: parseInt(birthYear), 
+                        driving_exp: drivingExp
+                    })
+                });
+
+                const data = await response.json();
+                const fmt = (n) => parseInt(n).toLocaleString() + '원';
+
+                // 데이터 바인딩
+                document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
+                document.getElementById('fuelCost').innerText = fmt(data.yearly_costs.fuel_20k);
+                document.getElementById('taxCost').innerText = fmt(data.calculated.tax_year);
+                document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
+                document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
+
+                // --- [수정됨] 배지 위치 변경 (주유비 옆으로 이동) ---
+                const badgeSpan = document.getElementById('fuelBadge');
+                const fuelGrade = data.specs.fuel_grade || "일반유"; 
+                
+                if(fuelGrade.includes("고급") || fuelGrade.includes("Premium")) {
+                    badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
+                } else {
+                    badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
+                }
+                // ------------------------------------------------
+
+                const list = document.getElementById('maintenanceList');
+                list.innerHTML = '';
+                if(data.maintenance_items) {
+                    data.maintenance_items.forEach(item => {
+                        list.innerHTML += `<li>
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong>${item.part}</strong>
+                                <span>${fmt(item.cost)}</span>
+                            </div>
+                            <div style="font-size:12px; color:#888; margin-top:2px;">🔄 ${item.cycle}</div>
+                        </li>`;
+                    });
+                }
+
+                document.getElementById('riskBox').innerText = data.risk_report;
+                document.getElementById('aiComment').innerText = `💡 "${data.total_comment}"`;
+
+                result.style.display = 'block';
+
+            } catch (error) {
+                alert('계산 중 오류가 발생했습니다.');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
