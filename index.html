@@ -22,10 +22,10 @@
         .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
         .detail-row:last-child { border-bottom: none; }
         
-        /* 연료 타입 배지 스타일 (사이즈 조절) */
+        /* 연료 타입 배지 스타일 */
         .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px; vertical-align: middle; }
-        .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } /* 고급유 */
-        .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 일반유 */
+        .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } 
+        .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } 
 
         .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; }
         .item-list { list-style: none; padding: 0; }
@@ -39,7 +39,7 @@
     
     <div class="card">
         <div class="input-group">
-            <label>차량 모델명</label>
+            <label>차량 모델명 <span style="color:red">*</span></label>
             <input type="text" id="carModel" placeholder="예: BMW 530i, 제네시스 G70">
         </div>
         <div class="input-group">
@@ -114,14 +114,53 @@
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
             
+            // 입력값 가져오기
+            const carModel = document.getElementById('carModel').value.trim();
+            const carYearVal = document.getElementById('carYear').value;
+            const birthYearVal = document.getElementById('birthYear').value;
+            const drivingExp = document.getElementById('drivingExp').value;
+            
+            // === [유효성 검사 로직 시작] ===
+            
+            // 1. 차량 모델명 필수 체크
+            if (!carModel) {
+                alert("🚗 차량 모델명을 입력해주세요!");
+                document.getElementById('carModel').focus();
+                return;
+            }
+
+            const currentYear = new Date().getFullYear();
+            const carYear = parseInt(carYearVal);
+            const birthYear = parseInt(birthYearVal);
+            const age = currentYear - birthYear;
+
+            // 2. 차량 연식 검증 (1950년 ~ 현재+1년)
+            // 보통 신차는 내년형 모델이 미리 나오므로 +1년까지 허용
+            if (isNaN(carYear) || carYear < 1950 || carYear > currentYear + 1) {
+                alert(`📅 차량 연식을 확인해주세요.\n(1950년 ~ ${currentYear + 1}년 사이만 가능)`);
+                document.getElementById('carYear').focus();
+                return;
+            }
+
+            // 3. 나이 검증 (만 18세 이상 운전 가능)
+            if (isNaN(birthYear) || age < 18) {
+                alert("🔞 만 18세 미만은 운전면허를 취득할 수 없어\n정확한 계산이 불가능합니다.");
+                document.getElementById('birthYear').focus();
+                return;
+            }
+
+            // 4. 나이 상한 검증 (100세 초과 방지)
+            if (age > 100) {
+                alert("👴 100세 이상으로 입력되었습니다.\n정확한 출생년도를 확인해주세요.");
+                document.getElementById('birthYear').focus();
+                return;
+            }
+            
+            // === [유효성 검사 통과 후 실행] ===
+
             btn.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
-
-            const carModel = document.getElementById('carModel').value;
-            const carYear = document.getElementById('carYear').value;
-            const birthYear = document.getElementById('birthYear').value;
-            const drivingExp = document.getElementById('drivingExp').value;
 
             // [중요] 본인의 n8n Webhook URL로 교체하세요!
             const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc'; 
@@ -132,8 +171,8 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
                         car_model: carModel, 
-                        car_year: parseInt(carYear),
-                        birth_year: parseInt(birthYear), 
+                        car_year: carYear,
+                        birth_year: birthYear, 
                         driving_exp: drivingExp
                     })
                 });
@@ -148,7 +187,7 @@
                 document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
                 document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
 
-                // --- [수정됨] 배지 위치 변경 (주유비 옆으로 이동) ---
+                // 배지 처리
                 const badgeSpan = document.getElementById('fuelBadge');
                 const fuelGrade = data.specs.fuel_grade || "일반유"; 
                 
@@ -157,7 +196,6 @@
                 } else {
                     badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
                 }
-                // ------------------------------------------------
 
                 const list = document.getElementById('maintenanceList');
                 list.innerHTML = '';
@@ -189,5 +227,3 @@
     </script>
 </body>
 </html>
-
-
