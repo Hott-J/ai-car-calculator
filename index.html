@@ -52,10 +52,35 @@
             backdrop-filter: blur(10px);
             padding: 24px;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
             margin-bottom: 16px;
             animation: fadeInUp 0.5s ease-out;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            transform: perspective(1000px) rotateX(0deg);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+            border-radius: 20px 20px 0 0;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: perspective(1000px) rotateX(2deg) translateY(-8px);
+            box-shadow:
+                0 30px 80px rgba(0,0,0,0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
         }
 
         @keyframes fadeInUp {
@@ -167,8 +192,35 @@
             border-radius: 24px;
             text-align: center;
             margin-bottom: 16px;
-            box-shadow: 0 15px 50px rgba(30, 64, 175, 0.5);
+            box-shadow:
+                0 25px 60px rgba(30, 64, 175, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.2);
+            transform: perspective(1000px) translateZ(0);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: visible;
+        }
+
+        .result-header:hover {
+            transform: perspective(1000px) translateZ(10px) translateY(-5px);
+            box-shadow:
+                0 35px 80px rgba(30, 64, 175, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .result-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+            border-radius: 24px 24px 0 0;
+            pointer-events: none;
         }
 
         .result-header .label {
@@ -195,6 +247,22 @@
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 16px;
+            box-shadow:
+                inset 0 2px 4px rgba(0,0,0,0.05),
+                0 0 0 1px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .car-info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
+            border-radius: 16px 16px 0 0;
+            pointer-events: none;
         }
 
         .car-info-title {
@@ -223,7 +291,18 @@
             background: white;
             padding: 12px;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.08),
+                0 0 0 1px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transform: translateZ(0);
+        }
+
+        .car-info-item:hover {
+            transform: translateY(-4px) translateZ(10px);
+            box-shadow:
+                0 8px 20px rgba(0,0,0,0.12),
+                0 0 0 1px rgba(0,0,0,0.08);
         }
 
         .car-info-item .label {
@@ -247,6 +326,40 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* 3D 아이콘 효과 */
+        .icon-3d {
+            display: inline-block;
+            font-size: 24px;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+            transform: translateZ(0);
+            transition: transform 0.3s;
+        }
+
+        .section-title:hover .icon-3d {
+            transform: translateY(-3px) rotateZ(-5deg) scale(1.1);
+            filter: drop-shadow(3px 6px 8px rgba(0,0,0,0.4));
+        }
+
+        /* 가격 태그 3D 효과 */
+        .price-tag {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 12px 0;
+            letter-spacing: -1px;
+            text-shadow:
+                0 2px 0 rgba(0,0,0,0.1),
+                0 4px 8px rgba(0,0,0,0.2);
+            transform: perspective(500px) translateZ(20px);
+            transition: all 0.3s;
+        }
+
+        .result-header:hover .price-tag {
+            transform: perspective(500px) translateZ(30px) scale(1.05);
+            text-shadow:
+                0 3px 0 rgba(0,0,0,0.15),
+                0 6px 12px rgba(0,0,0,0.3);
         }
 
         .detail-row {
@@ -484,7 +597,7 @@
 
             <!-- 1년 상세 지출 명세서 -->
             <div class="card">
-                <div class="section-title">📊 1년 상세 지출 명세서</div>
+                <div class="section-title"><span class="icon-3d">📊</span> 1년 상세 지출 명세서</div>
                 <div class="detail-row">
                     <span class="label" id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
                     <span class="value" id="fuelCost">0원</span>
@@ -505,13 +618,13 @@
 
             <!-- 주요 소모품 교체 비용 -->
             <div class="card">
-                <div class="section-title">🔩 주요 소모품 교체 비용 (예상)</div>
+                <div class="section-title"><span class="icon-3d">🔩</span> 주요 소모품 교체 비용 (예상)</div>
                 <ul id="maintenanceList" class="item-list"></ul>
             </div>
 
             <!-- 고질병 리포트 -->
             <div class="card">
-                <div class="section-title">⚠️ 구매 전 필독 (고질병 리포트)</div>
+                <div class="section-title"><span class="icon-3d">⚠️</span> 구매 전 필독 (고질병 리포트)</div>
                 <div id="riskBox" class="risk-box"></div>
                 <div id="aiComment" class="ai-comment"></div>
             </div>
