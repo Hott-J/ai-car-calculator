@@ -602,6 +602,25 @@
             font-size: 16px;
         }
 
+        /* 소모품 검색 버튼 */
+        .part-search-btn {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+
+        .part-search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
         @media (max-width: 600px) {
             .quick-links {
                 grid-template-columns: 1fr;
@@ -805,21 +824,21 @@
 
                 <!-- 빠른 링크 -->
                 <div class="quick-links">
-                    <a id="encarLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <a id="usedCarLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
                         <span class="icon">🚗</span>
-                        <span>엔카에서 찾기</span>
+                        <span>중고차 시세</span>
                     </a>
-                    <a id="partsLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
-                        <span class="icon">🔧</span>
-                        <span>부품 정보 검색</span>
+                    <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        <span class="icon">📺</span>
+                        <span>유튜브 리뷰</span>
                     </a>
-                    <a id="insuranceLink" href="https://www.carinsure.or.kr/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <a id="insuranceLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
                         <span class="icon">🛡</span>
-                        <span>보험료 비교</span>
+                        <span>보험 견적</span>
                     </a>
-                    <a id="communityLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
-                        <span class="icon">💬</span>
-                        <span>커뮤니티 후기</span>
+                    <a id="blogLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        <span class="icon">📝</span>
+                        <span>블로그 후기</span>
                     </a>
                 </div>
             </div>
@@ -997,11 +1016,12 @@
                     document.getElementById('modelWarning').style.display = 'none';
                 }
 
-                // 외부 링크 설정
+                // 외부 링크 설정 (실용적인 링크들)
                 const modelNameForSearch = aiModelName || carModel;
-                document.getElementById('encarLink').href = `https://www.encar.com/search?q=${encodeURIComponent(modelNameForSearch)}`;
-                document.getElementById('partsLink').href = `https://search.naver.com/search.naver?query=${encodeURIComponent(modelNameForSearch + ' 부품')}`;
-                document.getElementById('communityLink').href = `https://www.bobaedream.co.kr/search/main.php?query=${encodeURIComponent(modelNameForSearch)}`;
+                document.getElementById('usedCarLink').href = `https://search.naver.com/search.naver?where=web&query=${encodeURIComponent(modelNameForSearch + ' 중고차 시세')}`;
+                document.getElementById('youtubeLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(modelNameForSearch + ' 리뷰')}`;
+                document.getElementById('insuranceLink').href = `https://direct.samsungfire.com/`;
+                document.getElementById('blogLink').href = `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(modelNameForSearch + ' 후기')}`;
 
                 // 유지비 데이터 바인딩
                 document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
@@ -1036,15 +1056,21 @@
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-regular">💧일반유</span></span>`;
                 }
 
-                // 유지보수 항목 리스트 (개선된 스타일)
+                // 유지보수 항목 리스트 (개선된 스타일 + 검색 버튼)
                 const list = document.getElementById('maintenanceList');
                 list.innerHTML = '';
                 if(data.maintenance_items && data.maintenance_items.length > 0) {
                     data.maintenance_items.forEach(item => {
+                        const searchQuery = encodeURIComponent(`${modelNameForSearch} ${item.part}`);
                         list.innerHTML += `<li>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span class="part-name">${item.part}</span>
-                                <span class="part-cost">${fmt(item.cost)}</span>
+                                <div>
+                                    <span class="part-cost">${fmt(item.cost)}</span>
+                                    <button class="part-search-btn" onclick="window.open('https://search.shopping.naver.com/search/all?query=${searchQuery}', '_blank')">
+                                        🔍 검색
+                                    </button>
+                                </div>
                             </div>
                             <div class="part-cycle">🔄 교체 주기: ${item.cycle}</div>
                         </li>`;
