@@ -521,6 +521,17 @@
 
         footer p { margin: 8px 0; }
 
+        /* 모바일 최적화 */
+        @media (max-width: 600px) {
+            .flip-container {
+                min-height: 180px;
+            }
+
+            .flip-container.flipped {
+                min-height: 420px;
+            }
+        }
+
         /* 카드 플립 효과 */
         .flip-container {
             perspective: 1500px;
