@@ -215,15 +215,35 @@
                 });
 
                 // [중요] 데이터를 변수(let)로 선언해야 덮어쓰기 가능
-                let data = await response.json();
-                
-                // ★★★ [배열 껍질 벗기기 - 핵심 해결책] ★★★
-                // n8n 응답이 [{...}] 형태라면 첫 번째 요소만 꺼냅니다.
-                if (Array.isArray(data) && data.length > 0) {
-                    console.log("배열 데이터 감지됨. 첫 번째 항목 추출:", data[0]);
-                    data = data[0];
-                } else {
-                    console.log("객체 데이터 감지됨:", data);
+                let rawData = await response.json();
+                console.log("원본 데이터:", rawData);
+
+                // ★★★ [만능 데이터 정제 함수] ★★★
+                // 배열이든, json 껍질이 있든 무조건 알맹이를 찾아냅니다.
+                function normalizeData(obj) {
+                    if (!obj) return null;
+                    if (Array.isArray(obj)) {
+                        // 배열이면 첫 번째 꺼내서 다시 검사
+                        return normalizeData(obj[0]);
+                    }
+                    if (obj.json && obj.json.specs) {
+                        // n8n 특유의 { json: { specs: ... } } 구조라면 벗김
+                        return normalizeData(obj.json);
+                    }
+                    if (obj.specs) {
+                        // 우리가 찾는 정답 구조!
+                        return obj;
+                    }
+                    return obj; // 더 이상 깔 게 없으면 리턴
+                }
+
+                // 데이터 정제 실행
+                const data = normalizeData(rawData);
+                console.log("정제된 데이터:", data);
+
+                // 데이터 검증
+                if (!data || !data.calculated) {
+                    throw new Error("데이터 형식이 올바르지 않습니다.");
                 }
 
                 const fmt = (n) => parseInt(n).toLocaleString() + '원';
@@ -242,7 +262,7 @@
                 const fuelLabel = document.getElementById('fuelLabel');
                 
                 // 1. 백엔드 플래그 확인 (안전하게 chaining)
-                let isEV = (data.calculated && data.calculated.is_electric === true);
+                let isEV = (String(data.calculated.is_electric) === 'true');
                 
                 // 2. 텍스트 확인 (보조 수단)
                 const fuelGrade = (data.specs.fuel_grade || "").toLowerCase();
@@ -260,7 +280,10 @@
 
                 // [렌더링]
                 if (isEV) {
-                    // 전기차
+                    // 전기차 
+
+[Image of Electric Vehicle Icon]
+
                     badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
                     fuelLabel.innerHTML = `⚡ 연간 충전비 (12,000km) <span id="fuelBadge"><span class="badge badge-electric">⚡전기</span></span>`;
                 } else if(fuelGrade.includes("고급") || fuelGrade.includes("premium")) {
@@ -298,7 +321,7 @@
                 result.style.display = 'block';
 
             } catch (error) {
-                alert('계산 중 오류가 발생했습니다.');
+                alert('계산 중 오류가 발생했습니다.\n' + error.message);
                 console.error(error);
             } finally {
                 btn.disabled = false;
