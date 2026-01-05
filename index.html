@@ -260,31 +260,7 @@
                 // =======================================================
                 const badgeSpan = document.getElementById('fuelBadge');
                 const fuelLabel = document.getElementById('fuelLabel');
-                
-                // 1. 백엔드 플래그 확인 (안전하게 chaining)
-                let isEV = (data.calculated.is_electric === true);
-                
-                // 2. 텍스트 확인 (보조 수단)
                 const fuelGrade = (data.specs.fuel_grade || "").toLowerCase();
-                const fuelType = (data.specs.fuel_type || "").toLowerCase();
-                
-                if (fuelGrade.includes("전기") || fuelGrade.includes("electric") || fuelType.includes("전기")) {
-                    isEV = true;
-                }
-
-                // 3. [최후의 보루] 연료비가 100만원 이하인데 하이브리드가 아니면 전기차로 간주
-                if (!isEV && data.yearly_costs.fuel_20k < 1000000 && !fuelGrade.includes("hybrid") && !fuelGrade.includes("하이브리드")) {
-                    console.log("연료비가 저렴하여 전기차로 자동 보정했습니다.");
-                    isEV = true;
-                }
-
-                // ★ 디버깅 로그 ★
-                console.log("=== 배지 판별 디버깅 ===");
-                console.log("is_electric 값:", data.calculated.is_electric);
-                console.log("fuel_grade:", fuelGrade);
-                console.log("fuel_type:", fuelType);
-                console.log("최종 isEV:", isEV);
-                console.log("======================");
 
                 // [렌더링]
                 if (fuelGrade.includes("전기")) {
