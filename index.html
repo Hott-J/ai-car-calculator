@@ -8,38 +8,6 @@
     
     <meta name="description" content="자동차 유지비 계산기 - 차량 모델, 연식만 입력하면 AI가 보험료, 세금, 유류비, 정비비를 정밀 분석! 내 차 월 유지비를 지금 무료로 확인하세요.">
     
-    <meta name="keywords" content="자동차 유지비 계산기, 차 유지비 계산, 차량 유지비 계산, 중고차 유지비, 자동차 보험료 계산, 첫차 추천, 사회초년생 자동차, BMW 유지비, 아반떼 유지비, 카푸어 판독기, 연봉별 추천 차량, Car Agent">
-    <meta name="author" content="Car Agent">
-    
-    <meta name="naver-site-verification" content="79ad4603f5602bb71d6ccc25210a62aec4edbef4" />
-
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Car Agent">
-    <meta property="og:title" content="🚗 자동차 유지비 계산기 - AI 정밀 분석">
-    <meta property="og:description" content="차 유지비 계산! 보험료, 세금, 기름값, 정비비까지 AI가 당신의 차량 유지비를 정확하게 분석해드립니다.">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop">
-    
-    <meta property="og:url" content="https://www.car-agent.co.kr/">
-    <link rel="canonical" href="https://www.car-agent.co.kr/">
-    
-    <meta name="robots" content="index, follow">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Car Agent",
-      "applicationCategory": "FinanceApplication",
-      "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "KRW"
-      },
-      "description": "AI 기반 자동차 유지비 정밀 분석 계산기"
-    }
-    </script>
-
     <style>
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f7; color: #1d1d1f; line-height: 1.5; }
         .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -47,7 +15,7 @@
         
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: #86868b; font-size: 14px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border-1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; appearance: none; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; appearance: none; }
         input:focus, select:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
         
         button { width: 100%; padding: 16px; background: #0071e3; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 17px; margin-top: 10px; transition: background 0.2s; }
@@ -63,7 +31,7 @@
         .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } /* 고급유 */
         .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 일반유 */
         .badge-diesel { background: #dfe6e9; color: #2d3436; border: 1px solid #b2bec3; }  /* 경유 */
-        .badge-electric { background: #e3f2fd; color: #0277bd; border: 1px solid #b3e5fc; } /* 전기 (추가됨) */
+        .badge-electric { background: #e3f2fd; color: #0277bd; border: 1px solid #b3e5fc; } /* 전기 (파란색) */
 
         .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; word-break: keep-all; }
         .item-list { list-style: none; padding: 0; }
@@ -128,7 +96,7 @@
             <div class="card">
                 <h3>📊 1년 상세 지출 명세서</h3>
                 <div class="detail-row">
-                    <span>⛽ 연간 주유/충전비 (12,000km) <span id="fuelBadge"></span></span>
+                    <span id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
                     <span id="fuelCost" style="font-weight:bold;">0원</span>
                 </div>
                 <div class="detail-row">
@@ -231,7 +199,7 @@
             loading.style.display = 'block';
             result.style.display = 'none';
 
-            // [중요] Webhook URL
+            // [중요] Webhook URL - 본인의 URL이 맞는지 확인하세요
             const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc'; 
 
             try {
@@ -256,26 +224,37 @@
                 document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
                 document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
 
-                // ==========================
-                // [수정된 부분] 배지 처리 로직
-                // ==========================
+                // =======================================================
+                // [배지 및 텍스트 처리 로직] 전기차 판단 기준을 명확히 수정
+                // =======================================================
                 const badgeSpan = document.getElementById('fuelBadge');
-                const fuelGrade = data.specs.fuel_grade || "일반유"; 
+                const fuelLabel = document.getElementById('fuelLabel');
                 
-                if (fuelGrade.includes("전기") || fuelGrade.includes("Electric") || fuelGrade.includes("EV")) {
-                    // 전기차 배지
+                // 백엔드에서 계산된 확실한 '전기차 여부' 플래그 사용
+                // (백엔드 자바스크립트 코드 수정이 선행되어 있어야 함)
+                const isEV = (data.calculated && data.calculated.is_electric === true);
+                const fuelGrade = data.specs.fuel_grade || "";
+
+                if (isEV) {
+                    // 전기차일 경우
                     badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
+                    // 텍스트도 '충전비'로 변경 (선택사항)
+                    fuelLabel.innerHTML = `⚡ 연간 충전비 (12,000km) <span id="fuelBadge"><span class="badge badge-electric">⚡전기</span></span>`;
                 } else if(fuelGrade.includes("고급") || fuelGrade.includes("Premium")) {
-                    // 고급유 배지
+                    // 고급유
                     badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
-                } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤")) {
-                    // 디젤 배지
+                    fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-premium">🔥고급유</span></span>`;
+                } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤") || fuelGrade.includes("Diesel")) {
+                    // 디젤
                     badgeSpan.innerHTML = `<span class="badge badge-diesel">⛽경유</span>`;
+                    fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-diesel">⛽경유</span></span>`;
                 } else {
-                    // 일반유 배지
+                    // 일반유 (기본)
                     badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
+                    fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-regular">💧일반유</span></span>`;
                 }
 
+                // 유지보수 항목 리스트
                 const list = document.getElementById('maintenanceList');
                 list.innerHTML = '';
                 if(data.maintenance_items) {
