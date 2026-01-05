@@ -566,6 +566,48 @@
 
         footer p { margin: 8px 0; }
 
+        /* 외부 링크 버튼 */
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1.5px solid #cbd5e0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #2d3748;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .link-btn .icon {
+            font-size: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .quick-links {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* 모바일 최적화 */
         @media (max-width: 600px) {
             .flip-container {
@@ -760,6 +802,26 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 빠른 링크 -->
+                <div class="quick-links">
+                    <a id="encarLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        <span class="icon">🚗</span>
+                        <span>엔카에서 찾기</span>
+                    </a>
+                    <a id="partsLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        <span class="icon">🔧</span>
+                        <span>부품 정보 검색</span>
+                    </a>
+                    <a id="insuranceLink" href="https://www.carinsure.or.kr/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        <span class="icon">🛡</span>
+                        <span>보험료 비교</span>
+                    </a>
+                    <a id="communityLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        <span class="icon">💬</span>
+                        <span>커뮤니티 후기</span>
+                    </a>
+                </div>
             </div>
 
             <!-- 주요 소모품 교체 비용 -->
@@ -934,6 +996,12 @@
                 } else {
                     document.getElementById('modelWarning').style.display = 'none';
                 }
+
+                // 외부 링크 설정
+                const modelNameForSearch = aiModelName || carModel;
+                document.getElementById('encarLink').href = `https://www.encar.com/search?q=${encodeURIComponent(modelNameForSearch)}`;
+                document.getElementById('partsLink').href = `https://search.naver.com/search.naver?query=${encodeURIComponent(modelNameForSearch + ' 부품')}`;
+                document.getElementById('communityLink').href = `https://www.bobaedream.co.kr/search/main.php?query=${encodeURIComponent(modelNameForSearch)}`;
 
                 // 유지비 데이터 바인딩
                 document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
