@@ -1095,13 +1095,23 @@
     </footer>
 
     <script>
-        // 카드 플립 함수
+        // ============================================================
+        // [1] 세션 ID 생성 및 관리 (메모리 기능을 위한 핵심 코드)
+        // ============================================================
+        let sessionId = localStorage.getItem('car_agent_session');
+        if (!sessionId) {
+            // 세션 ID가 없으면 랜덤 생성 (시간+난수 조합)
+            sessionId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+            localStorage.setItem('car_agent_session', sessionId);
+        }
+        console.log("현재 세션 ID:", sessionId); // 디버깅용
+
+        // ============ 카드 UI 관련 함수 ============
         function flipCard() {
             const flipContainer = document.getElementById('flipCard');
             flipContainer.classList.toggle('flipped');
         }
 
-        // 입력창으로 스크롤
         function scrollToInput() {
             const inputField = document.getElementById('carModel');
             inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1111,18 +1121,17 @@
             }, 500);
         }
 
+        // ============ 계산기 로직 (기존 유지) ============
         async function calculate() {
             const btn = document.querySelector('button');
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
-            
-            // 입력값 가져오기
+
             const carModel = document.getElementById('carModel').value.trim();
             const carYearVal = document.getElementById('carYear').value;
             const birthYearVal = document.getElementById('birthYear').value;
             const drivingExp = document.getElementById('drivingExp').value;
-            
-            // === [유효성 검사 로직] ===
+
             if (!carModel) {
                 alert("🚗 차량 모델명을 입력해주세요!");
                 document.getElementById('carModel').focus();
@@ -1151,63 +1160,45 @@
                 document.getElementById('birthYear').focus();
                 return;
             }
-            
-            // === [유효성 검사 통과] ===
 
             btn.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
 
-            // [중요] Webhook URL - 본인의 URL이 맞는지 확인하세요
-            const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc'; 
+            // 계산기 웹훅 URL
+            const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc';
 
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        car_model: carModel, 
+                    body: JSON.stringify({
+                        car_model: carModel,
                         car_year: carYear,
-                        birth_year: birthYear, 
-                        driving_exp: drivingExp
+                        birth_year: birthYear,
+                        driving_exp: drivingExp,
+                        sessionId: sessionId // 계산기에도 세션 ID를 보내두면 나중에 로그 분석에 유리함
                     })
                 });
 
-                // [중요] 데이터를 변수(let)로 선언해야 덮어쓰기 가능
                 let rawData = await response.json();
-                console.log("원본 데이터:", rawData);
 
-                // ★★★ [만능 데이터 정제 함수] ★★★
-                // 배열이든, json 껍질이 있든 무조건 알맹이를 찾아냅니다.
                 function normalizeData(obj) {
                     if (!obj) return null;
-                    if (Array.isArray(obj)) {
-                        // 배열이면 첫 번째 꺼내서 다시 검사
-                        return normalizeData(obj[0]);
-                    }
-                    if (obj.json && obj.json.specs) {
-                        // n8n 특유의 { json: { specs: ... } } 구조라면 벗김
-                        return normalizeData(obj.json);
-                    }
-                    if (obj.specs) {
-                        // 우리가 찾는 정답 구조!
-                        return obj;
-                    }
-                    return obj; // 더 이상 깔 게 없으면 리턴
+                    if (Array.isArray(obj)) return normalizeData(obj[0]);
+                    if (obj.json && obj.json.specs) return normalizeData(obj.json);
+                    if (obj.specs) return obj;
+                    return obj;
                 }
 
-                // 데이터 정제 실행
                 const data = normalizeData(rawData);
-                console.log("정제된 데이터:", data);
 
-                // 데이터 검증
                 if (!data || !data.calculated) {
                     throw new Error("데이터 형식이 올바르지 않습니다.");
                 }
 
                 const fmt = (n) => parseInt(n).toLocaleString() + '원';
 
-                // 차량 정보 바인딩
                 const aiModelName = data.specs.model_name || carModel;
                 document.getElementById('carModelName').innerText = aiModelName;
                 document.getElementById('carEngineCC').innerText = data.specs.engine_cc ? `${data.specs.engine_cc}cc` : (data.specs.fuel_type === '전기' ? '전기모터' : '-');
@@ -1215,11 +1206,9 @@
                 document.getElementById('carFuelType').innerText = data.specs.fuel_grade || data.specs.fuel_type || '-';
                 document.getElementById('carMarketPrice').innerText = data.specs.market_price ? fmt(data.specs.market_price) : '-';
 
-                // AI 추론 vs 사용자 입력 비교
                 const userInput = carModel.toLowerCase().trim();
                 const aiOutput = aiModelName.toLowerCase();
 
-                // 사용자가 짧게 입력했거나, AI가 다른 모델을 추론한 경우
                 if (userInput.length < 5 || !aiOutput.includes(userInput)) {
                     document.getElementById('modelWarning').style.display = 'block';
                     document.getElementById('userInputModel').innerText = `(입력: "${carModel}")`;
@@ -1227,47 +1216,36 @@
                     document.getElementById('modelWarning').style.display = 'none';
                 }
 
-                // 외부 링크 설정 (실용적인 링크들)
                 const modelNameForSearch = aiModelName || carModel;
                 document.getElementById('usedCarLink').href = `https://search.naver.com/search.naver?where=web&query=${encodeURIComponent(modelNameForSearch + ' 중고차 시세')}`;
                 document.getElementById('youtubeLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(modelNameForSearch + ' 리뷰')}`;
                 document.getElementById('insuranceLink').href = `https://direct.samsungfire.com/`;
                 document.getElementById('blogLink').href = `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(modelNameForSearch + ' 후기')}`;
 
-                // 유지비 데이터 바인딩
                 document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
                 document.getElementById('fuelCost').innerText = fmt(data.yearly_costs.fuel_20k);
                 document.getElementById('taxCost').innerText = fmt(data.calculated.tax_year);
                 document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
                 document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
 
-                // =======================================================
-                // [배지 및 텍스트 처리 로직]
-                // =======================================================
                 const badgeSpan = document.getElementById('fuelBadge');
                 const fuelLabel = document.getElementById('fuelLabel');
                 const fuelGrade = (data.specs.fuel_grade || "").toLowerCase();
 
-                // [렌더링]
                 if (fuelGrade.includes("전기")) {
-                    // 전기차
                     badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
                     fuelLabel.innerHTML = `⚡ 연간 충전비 (12,000km) <span id="fuelBadge"><span class="badge badge-electric">⚡전기</span></span>`;
                 } else if(fuelGrade.includes("고급") || fuelGrade.includes("premium")) {
-                    // 고급유
                     badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-premium">🔥고급유</span></span>`;
                 } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤") || fuelGrade.includes("diesel")) {
-                    // 디젤
                     badgeSpan.innerHTML = `<span class="badge badge-diesel">⛽경유</span>`;
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-diesel">⛽경유</span></span>`;
                 } else {
-                    // 일반유
                     badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-regular">💧일반유</span></span>`;
                 }
 
-                // 유지보수 항목 리스트 (개선된 스타일 + 검색 버튼)
                 const list = document.getElementById('maintenanceList');
                 list.innerHTML = '';
                 if(data.maintenance_items && data.maintenance_items.length > 0) {
@@ -1293,7 +1271,6 @@
                 document.getElementById('riskBox').innerText = data.risk_report || '특별한 고질병 정보가 없습니다.';
                 document.getElementById('aiComment').innerText = `💡 ${data.total_comment || 'AI 분석 완료'}`;
 
-                // 결과 표시 & SEO 콘텐츠 숨기기
                 result.style.display = 'block';
                 document.getElementById('seoContent').style.display = 'none';
 
@@ -1313,7 +1290,6 @@
             chatWindow.style.display = isOpen ? 'none' : 'flex';
 
             if (!isOpen) {
-                // 채팅창이 열릴 때 입력 필드에 포커스
                 document.getElementById('chatInput').focus();
             }
         }
@@ -1324,16 +1300,14 @@
 
             if (!message) return;
 
-            // 사용자 메시지 표시
             addMessage(message, 'user');
             input.value = '';
 
-            // 타이핑 인디케이터 표시
             const typingId = 'typing-' + Date.now();
             addTypingIndicator(typingId);
 
             try {
-                // n8n 웹훅으로 메시지 전송
+                // [2] n8n 채팅 웹훅으로 메시지 전송 (sessionId 포함!)
                 const response = await fetch('https://bot.hopto.org/webhook/1217a495-1bb2-4a90-a56c-4497f248c1ec', {
                     method: 'POST',
                     headers: {
@@ -1341,16 +1315,14 @@
                     },
                     body: JSON.stringify({
                         message: message,
+                        sessionId: sessionId, // ★★★ 여기가 핵심입니다 (세션 ID 전송)
                         timestamp: new Date().toISOString()
                     })
                 });
 
                 const data = await response.json();
 
-                // 타이핑 인디케이터 제거
                 removeTypingIndicator(typingId);
-
-                // 봇 응답 표시
                 addMessage(data.reply || '응답을 받지 못했습니다.', 'bot');
 
             } catch (error) {
@@ -1371,8 +1343,6 @@
 
             messageDiv.appendChild(bubbleDiv);
             messagesContainer.appendChild(messageDiv);
-
-            // 스크롤을 맨 아래로
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
@@ -1394,7 +1364,6 @@
             }
         }
 
-        // Enter 키로 메시지 전송
         document.addEventListener('DOMContentLoaded', function() {
             const chatInput = document.getElementById('chatInput');
             if (chatInput) {
