@@ -47,7 +47,7 @@
         
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: #86868b; font-size: 14px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; appearance: none; }
+        input, select { width: 100%; padding: 12px; border-1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; appearance: none; }
         input:focus, select:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
         
         button { width: 100%; padding: 16px; background: #0071e3; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 17px; margin-top: 10px; transition: background 0.2s; }
@@ -63,6 +63,7 @@
         .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } /* 고급유 */
         .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 일반유 */
         .badge-diesel { background: #dfe6e9; color: #2d3436; border: 1px solid #b2bec3; }  /* 경유 */
+        .badge-electric { background: #e3f2fd; color: #0277bd; border: 1px solid #b3e5fc; } /* 전기 (추가됨) */
 
         .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; word-break: keep-all; }
         .item-list { list-style: none; padding: 0; }
@@ -88,7 +89,7 @@
         <div class="card">
             <div class="input-group">
                 <label for="carModel">차량 모델명 <span style="color:red">*</span></label>
-                <input type="text" id="carModel" placeholder="예: BMW 520d, 아반떼 CN7, 제네시스 G80">
+                <input type="text" id="carModel" placeholder="예: BMW 520d, 아반떼 CN7, 테슬라 모델3">
             </div>
             <div class="input-group">
                 <label for="carYear">차량 연식 <span style="color:red">*</span></label>
@@ -127,7 +128,7 @@
             <div class="card">
                 <h3>📊 1년 상세 지출 명세서</h3>
                 <div class="detail-row">
-                    <span>⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
+                    <span>⛽ 연간 주유/충전비 (12,000km) <span id="fuelBadge"></span></span>
                     <span id="fuelCost" style="font-weight:bold;">0원</span>
                 </div>
                 <div class="detail-row">
@@ -160,7 +161,7 @@
             <h2>💡 자동차 유지비 계산기, 왜 필요할까요?</h2>
             <p>
                 많은 분들이 차량 구매 시 <strong>차량 가격</strong>과 할부금만 생각하지만, 실제로 우리를 힘들게 하는 것은 매달 나가는 <strong>차 유지비</strong>입니다.
-                Car Agent 자동차 유지비 계산기는 <strong>자동차세, 보험료, 유류비, 정비 예비비</strong>를 종합적으로 분석하여 현실적인 차량 유지비를 알려드립니다.
+                Car Agent 자동차 유지비 계산기는 <strong>자동차세, 보험료, 유류비(충전비), 정비 예비비</strong>를 종합적으로 분석하여 현실적인 차량 유지비를 알려드립니다.
             </p>
 
             <h3>❓ 사회초년생 첫차, 차량 유지비 얼마나 들까?</h3>
@@ -169,17 +170,10 @@
                 본 차 유지비 계산기를 통해 내 나이와 운전 경력에 맞는 정확한 자동차 유지비를 미리 확인해보세요.
             </p>
 
-            <h3>⚙️ 수입차(BMW, 벤츠) 차량 유지비의 진실</h3>
+            <h3>⚙️ 수입차/전기차 차량 유지비의 진실</h3>
             <p>
-                수입차는 국산차 대비 <strong>부품값과 공임비가 2~3배</strong> 비쌉니다.
-                단순히 기름값만 계산해서는 안 되며, 워런티 만료 후 발생할 수 있는 <strong>고질병 수리비</strong>를 예비비로 잡아두는 것이 현명합니다.
-                자동차 유지비 계산을 통해 수입차의 실제 유지비를 확인하세요.
-            </p>
-
-            <h3>📊 연봉별 추천 차량은? (곧 업데이트 예정)</h3>
-            <p>
-                내 연봉에 맞는 차량을 찾고 계신가요? Car Agent는 곧 <strong>연봉별 추천 차량</strong> 기능을 추가할 예정입니다.
-                자동차 유지비 계산과 함께 내 소득 수준에 맞는 합리적인 차량 선택을 도와드리겠습니다.
+                수입차는 국산차 대비 <strong>부품값과 공임비가 2~3배</strong> 비쌉니다. 전기차는 충전비는 저렴하지만 <strong>보험료와 타이어 값</strong>이 비쌀 수 있습니다.
+                단순히 연료비만 계산해서는 안 되며, 워런티 만료 후 발생할 수 있는 <strong>고질병 수리비</strong>를 예비비로 잡아두는 것이 현명합니다.
             </p>
         </section>
     </main>
@@ -202,8 +196,6 @@
             const drivingExp = document.getElementById('drivingExp').value;
             
             // === [유효성 검사 로직] ===
-            
-            // 1. 차량 모델명 필수 체크
             if (!carModel) {
                 alert("🚗 차량 모델명을 입력해주세요!");
                 document.getElementById('carModel').focus();
@@ -215,21 +207,18 @@
             const birthYear = parseInt(birthYearVal);
             const age = currentYear - birthYear;
 
-            // 2. 차량 연식 검증
             if (isNaN(carYear) || carYear < 1950 || carYear > currentYear + 1) {
                 alert(`📅 차량 연식을 확인해주세요.\n(1950년 ~ ${currentYear + 1}년 사이만 가능)`);
                 document.getElementById('carYear').focus();
                 return;
             }
 
-            // 3. 나이 검증
             if (isNaN(birthYear) || age < 18) {
                 alert("🔞 만 18세 미만은 운전면허를 취득할 수 없어\n정확한 계산이 불가능합니다.");
                 document.getElementById('birthYear').focus();
                 return;
             }
 
-            // 4. 나이 상한 검증
             if (age > 100) {
                 alert("👴 100세 이상으로 입력되었습니다.\n정확한 출생년도를 확인해주세요.");
                 document.getElementById('birthYear').focus();
@@ -267,16 +256,23 @@
                 document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
                 document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
 
-                // 배지 처리
+                // ==========================
+                // [수정된 부분] 배지 처리 로직
+                // ==========================
                 const badgeSpan = document.getElementById('fuelBadge');
                 const fuelGrade = data.specs.fuel_grade || "일반유"; 
                 
-                // 경유, 고급유, 일반유 구분
-                if(fuelGrade.includes("고급") || fuelGrade.includes("Premium")) {
+                if (fuelGrade.includes("전기") || fuelGrade.includes("Electric") || fuelGrade.includes("EV")) {
+                    // 전기차 배지
+                    badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
+                } else if(fuelGrade.includes("고급") || fuelGrade.includes("Premium")) {
+                    // 고급유 배지
                     badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
                 } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤")) {
+                    // 디젤 배지
                     badgeSpan.innerHTML = `<span class="badge badge-diesel">⛽경유</span>`;
                 } else {
+                    // 일반유 배지
                     badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
                 }
 
