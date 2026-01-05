@@ -262,7 +262,7 @@
                 const fuelLabel = document.getElementById('fuelLabel');
                 
                 // 1. 백엔드 플래그 확인 (안전하게 chaining)
-                let isEV = (String(data.calculated.is_electric) === 'true');
+                let isEV = (data.calculated.is_electric === true);
                 
                 // 2. 텍스트 확인 (보조 수단)
                 const fuelGrade = (data.specs.fuel_grade || "").toLowerCase();
@@ -278,12 +278,17 @@
                     isEV = true;
                 }
 
+                // ★ 디버깅 로그 ★
+                console.log("=== 배지 판별 디버깅 ===");
+                console.log("is_electric 값:", data.calculated.is_electric);
+                console.log("fuel_grade:", fuelGrade);
+                console.log("fuel_type:", fuelType);
+                console.log("최종 isEV:", isEV);
+                console.log("======================");
+
                 // [렌더링]
-                if (isEV) {
-                    // 전기차 
-
-[Image of Electric Vehicle Icon]
-
+                if (fuelGrade.includes("전기")) {
+                    // 전기차
                     badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
                     fuelLabel.innerHTML = `⚡ 연간 충전비 (12,000km) <span id="fuelBadge"><span class="badge badge-electric">⚡전기</span></span>`;
                 } else if(fuelGrade.includes("고급") || fuelGrade.includes("premium")) {
