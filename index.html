@@ -520,6 +520,68 @@
         }
 
         footer p { margin: 8px 0; }
+
+        /* 카드 플립 효과 */
+        .flip-container {
+            perspective: 1500px;
+            margin-bottom: 16px;
+        }
+
+        .flipper {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .flip-container.flipped .flipper {
+            transform: rotateY(180deg);
+        }
+
+        .flip-front, .flip-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .flip-front {
+            position: relative;
+            z-index: 2;
+        }
+
+        .flip-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            transform: rotateY(180deg);
+        }
+
+        /* 클릭 힌트 */
+        .click-hint {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            animation: pulse 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .result-header {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .result-header:active {
+            transform: perspective(1000px) translateZ(5px) translateY(-2px) scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -562,11 +624,43 @@
         </div>
 
         <div id="result" style="display:none;">
-            <!-- 월 예상 유지비 -->
-            <div class="result-header">
-                <div class="label">월 예상 유지비</div>
-                <div class="price-tag" id="monthlyTotal">0원</div>
-                <div class="sub">(할부금 제외 순수 유지비)</div>
+            <!-- 플립 카드 컨테이너 -->
+            <div class="flip-container" id="flipCard">
+                <div class="flipper">
+                    <!-- 앞면: 월 예상 유지비 -->
+                    <div class="flip-front">
+                        <div class="result-header" onclick="flipCard()">
+                            <div class="label">월 예상 유지비</div>
+                            <div class="price-tag" id="monthlyTotal">0원</div>
+                            <div class="sub">(할부금 제외 순수 유지비)</div>
+                            <div class="click-hint">👆 클릭하여 상세보기</div>
+                        </div>
+                    </div>
+
+                    <!-- 뒷면: 1년 상세 지출 명세서 -->
+                    <div class="flip-back">
+                        <div class="card" onclick="flipCard()" style="cursor: pointer; margin-bottom: 0;">
+                            <div class="section-title"><span class="icon-3d">📊</span> 1년 상세 지출 명세서</div>
+                            <div class="detail-row">
+                                <span class="label" id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
+                                <span class="value" id="fuelCost">0원</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">🏛 자동차세 (연납할인 미적용)</span>
+                                <span class="value" id="taxCost">0원</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">🛡 자동차 보험료(예상)</span>
+                                <span class="value" id="insCost">0원</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">🔧 정비/소모품 예비비</span>
+                                <span class="value" id="repairCost">0원</span>
+                            </div>
+                            <div class="click-hint" style="bottom: 16px;">👆 클릭하여 돌아가기</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 차량 정보 카드 -->
@@ -592,27 +686,6 @@
                             <div class="value" id="carMarketPrice">-</div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- 1년 상세 지출 명세서 -->
-            <div class="card">
-                <div class="section-title"><span class="icon-3d">📊</span> 1년 상세 지출 명세서</div>
-                <div class="detail-row">
-                    <span class="label" id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
-                    <span class="value" id="fuelCost">0원</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">🏛 자동차세 (연납할인 미적용)</span>
-                    <span class="value" id="taxCost">0원</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">🛡 자동차 보험료(예상)</span>
-                    <span class="value" id="insCost">0원</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">🔧 정비/소모품 예비비</span>
-                    <span class="value" id="repairCost">0원</span>
                 </div>
             </div>
 
@@ -657,6 +730,12 @@
     </footer>
 
     <script>
+        // 카드 플립 함수
+        function flipCard() {
+            const flipContainer = document.getElementById('flipCard');
+            flipContainer.classList.toggle('flipped');
+        }
+
         async function calculate() {
             const btn = document.querySelector('button');
             const loading = document.getElementById('loading');
