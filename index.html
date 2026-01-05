@@ -525,6 +525,12 @@
         .flip-container {
             perspective: 1500px;
             margin-bottom: 16px;
+            min-height: 200px;
+            transition: min-height 0.8s ease;
+        }
+
+        .flip-container.flipped {
+            min-height: 350px;
         }
 
         .flipper {
