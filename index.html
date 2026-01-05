@@ -107,6 +107,21 @@
 
         .input-group { margin-bottom: 18px; }
 
+        .input-hint {
+            margin-top: 8px;
+            padding: 12px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 3px solid #f59e0b;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #78350f;
+        }
+
+        .input-hint strong {
+            color: #92400e;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -279,6 +294,36 @@
             font-weight: 800;
             color: #2d3748;
             margin-bottom: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .model-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 3px solid #f59e0b;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #78350f;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .recheck-btn {
+            width: auto;
+            padding: 6px 12px;
+            margin: 8px 0 0 0;
+            font-size: 12px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .recheck-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
         }
 
         .car-info-grid {
@@ -613,6 +658,12 @@
             <div class="input-group">
                 <label for="carModel">차량 모델명 <span style="color:red">*</span></label>
                 <input type="text" id="carModel" placeholder="예: BMW 520d, 아반떼 CN7, 테슬라 모델3">
+                <div class="input-hint">
+                    💡 <strong>구체적으로 입력할수록 정확해요!</strong><br>
+                    <span style="font-size: 12px; color: #718096;">
+                        "520" 대신 "520d" 또는 "520i"처럼 정확히 입력하면 더 정밀한 분석이 가능합니다.
+                    </span>
+                </div>
             </div>
             <div class="input-group">
                 <label for="carYear">차량 연식 <span style="color:red">*</span></label>
@@ -683,8 +734,13 @@
             <!-- 차량 정보 카드 -->
             <div class="card">
                 <div class="car-info-card">
-                    <div class="car-info-title">분석된 차량</div>
+                    <div class="car-info-title">🤖 AI가 분석한 차량</div>
                     <div class="car-info-name" id="carModelName">-</div>
+                    <div id="modelWarning" class="model-warning" style="display: none;">
+                        ⚠️ 다른 모델을 찾으셨나요?
+                        <span id="userInputModel" style="font-weight: 600;"></span>
+                        <button onclick="scrollToInput()" class="recheck-btn">🔄 다시 검색하기</button>
+                    </div>
                     <div class="car-info-grid">
                         <div class="car-info-item">
                             <div class="label">배기량</div>
@@ -751,6 +807,16 @@
         function flipCard() {
             const flipContainer = document.getElementById('flipCard');
             flipContainer.classList.toggle('flipped');
+        }
+
+        // 입력창으로 스크롤
+        function scrollToInput() {
+            const inputField = document.getElementById('carModel');
+            inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                inputField.focus();
+                inputField.select();
+            }, 500);
         }
 
         async function calculate() {
@@ -850,11 +916,24 @@
                 const fmt = (n) => parseInt(n).toLocaleString() + '원';
 
                 // 차량 정보 바인딩
-                document.getElementById('carModelName').innerText = data.specs.model_name || carModel;
+                const aiModelName = data.specs.model_name || carModel;
+                document.getElementById('carModelName').innerText = aiModelName;
                 document.getElementById('carEngineCC').innerText = data.specs.engine_cc ? `${data.specs.engine_cc}cc` : (data.specs.fuel_type === '전기' ? '전기모터' : '-');
                 document.getElementById('carFuelEff').innerText = data.specs.fuel_eff ? `${data.specs.fuel_eff}km/L` : '-';
                 document.getElementById('carFuelType').innerText = data.specs.fuel_grade || data.specs.fuel_type || '-';
                 document.getElementById('carMarketPrice').innerText = data.specs.market_price ? fmt(data.specs.market_price) : '-';
+
+                // AI 추론 vs 사용자 입력 비교
+                const userInput = carModel.toLowerCase().trim();
+                const aiOutput = aiModelName.toLowerCase();
+
+                // 사용자가 짧게 입력했거나, AI가 다른 모델을 추론한 경우
+                if (userInput.length < 5 || !aiOutput.includes(userInput)) {
+                    document.getElementById('modelWarning').style.display = 'block';
+                    document.getElementById('userInputModel').innerText = `(입력: "${carModel}")`;
+                } else {
+                    document.getElementById('modelWarning').style.display = 'none';
+                }
 
                 // 유지비 데이터 바인딩
                 document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
