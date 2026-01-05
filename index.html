@@ -720,7 +720,7 @@
             </div>
         </div>
 
-        <section class="seo-content">
+        <section class="seo-content" id="seoContent">
             <h2>💡 자동차 유지비 계산기, 왜 필요할까요?</h2>
             <p>
                 많은 분들이 차량 구매 시 <strong>차량 가격</strong>과 할부금만 생각하지만, 실제로 우리를 힘들게 하는 것은 매달 나가는 <strong>차 유지비</strong>입니다.
@@ -909,7 +909,9 @@
                 document.getElementById('riskBox').innerText = data.risk_report || '특별한 고질병 정보가 없습니다.';
                 document.getElementById('aiComment').innerText = `💡 ${data.total_comment || 'AI 분석 완료'}`;
 
+                // 결과 표시 & SEO 콘텐츠 숨기기
                 result.style.display = 'block';
+                document.getElementById('seoContent').style.display = 'none';
 
             } catch (error) {
                 alert('계산 중 오류가 발생했습니다.\n' + error.message);
