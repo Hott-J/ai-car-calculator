@@ -9,48 +9,362 @@
     <meta name="description" content="자동차 유지비 계산기 - 차량 모델, 연식만 입력하면 AI가 보험료, 세금, 유류비, 정비비를 정밀 분석! 내 차 월 유지비를 지금 무료로 확인하세요.">
     
     <style>
-        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f7; color: #1d1d1f; line-height: 1.5; }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h1 { text-align: center; color: #1d1d1f; margin-bottom: 30px; font-size: 26px; font-weight: 800; }
-        
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #86868b; font-size: 14px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; appearance: none; }
-        input:focus, select:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
-        
-        button { width: 100%; padding: 16px; background: #0071e3; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 17px; margin-top: 10px; transition: background 0.2s; }
-        button:hover { background: #0077ed; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .price-tag { font-size: 32px; font-weight: 800; color: #1d1d1f; text-align: center; margin: 10px 0; }
-        .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 15px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .input-group { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background-color: #f7fafc;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 17px;
+            margin-top: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 28px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .result-header .label {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .price-tag {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 12px 0;
+            letter-spacing: -1px;
+        }
+
+        .result-header .sub {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .car-info-card {
+            background: linear-gradient(135deg, #f6f8fb 0%, #e9eef5 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .car-info-title {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .car-info-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: #2d3748;
+            margin-bottom: 16px;
+        }
+
+        .car-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .car-info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .car-info-item .label {
+            font-size: 11px;
+            color: #a0aec0;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .car-info-item .value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
         .detail-row:last-child { border-bottom: none; }
-        
-        /* 배지 스타일 정의 */
-        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px; vertical-align: middle; }
-        .badge-premium { background: #ffebeb; color: #d63031; border: 1px solid #ffcccc; } /* 고급유 */
-        .badge-regular { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 일반유 */
-        .badge-diesel { background: #dfe6e9; color: #2d3436; border: 1px solid #b2bec3; }  /* 경유 */
-        .badge-electric { background: #e3f2fd; color: #0277bd; border: 1px solid #b3e5fc; } /* 전기 (파란색) */
 
-        .risk-box { background: #fff5f5; border: 1px solid #ffcccc; color: #d63031; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; word-break: keep-all; }
+        .detail-row .label {
+            font-size: 15px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .detail-row .value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        /* 배지 스타일 */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .badge-premium { background: #fee; color: #c53030; }
+        .badge-regular { background: #e6ffed; color: #22543d; }
+        .badge-diesel { background: #e2e8f0; color: #2d3748; }
+        .badge-electric { background: #ebf8ff; color: #2c5282; }
+
+        .risk-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border-left: 4px solid #fc8181;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.7;
+            word-break: keep-all;
+            color: #742a2a;
+        }
+
+        .ai-comment {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-left: 4px solid #667eea;
+            padding: 18px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #4a5568;
+            font-style: italic;
+        }
+
         .item-list { list-style: none; padding: 0; }
-        .item-list li { background: #f9f9f9; padding: 12px; margin-bottom: 8px; border-radius: 8px; font-size: 14px; }
-        .loading { text-align: center; display: none; padding: 20px; }
-        
-        .seo-content { margin-top: 50px; padding: 20px; background: #fff; border-radius: 16px; color: #444; }
-        .seo-content h2 { font-size: 18px; margin-bottom: 10px; color: #1d1d1f; }
-        .seo-content h3 { font-size: 16px; margin-top: 25px; margin-bottom: 8px; color: #333; }
-        .seo-content p { font-size: 14px; line-height: 1.6; margin-bottom: 15px; color: #666; }
 
-        footer { text-align: center; margin-top: 40px; color: #86868b; font-size: 12px; padding-bottom: 20px; }
+        .item-list li {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border-left: 3px solid #667eea;
+            transition: transform 0.2s;
+        }
+
+        .item-list li:hover {
+            transform: translateX(4px);
+        }
+
+        .item-list .part-name {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .item-list .part-cost {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .item-list .part-cycle {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            display: none;
+            padding: 40px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .seo-content {
+            margin-top: 50px;
+            padding: 24px;
+            background: white;
+            border-radius: 20px;
+            color: #4a5568;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .seo-content h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .seo-content h3 {
+            font-size: 17px;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .seo-content p {
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+            color: #4a5568;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            padding-bottom: 30px;
+        }
+
+        footer p { margin: 8px 0; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>🚗 자동차 유지비 계산기</h1>
-        <p style="text-align: center; color: #666; font-size: 14px; margin-top: -20px; margin-bottom: 30px;">AI가 분석하는 차량 보험료, 세금, 유류비, 정비비까지 한눈에!</p>
+        <p class="subtitle">AI가 분석하는 차량 보험료, 세금, 유류비, 정비비까지 한눈에!</p>
     </header>
     
     <main>
@@ -81,47 +395,76 @@
         </div>
 
         <div id="loading" class="loading">
-            <p><strong>Car Agent</strong>가 고객님의 조건과<br>실시간 유가/보험 데이터를 분석 중입니다...🕵️‍♂️</p>
+            <div class="loading-spinner"></div>
+            <p><strong>Car Agent</strong>가 고객님의 조건과<br>실시간 유가/보험 데이터를 분석 중입니다...</p>
         </div>
 
         <div id="result" style="display:none;">
-            <div class="card" style="border: 2px solid #0071e3; background: #f0f7ff;">
-                <div style="text-align: center;">
-                    <span style="font-size: 14px; color: #0071e3; font-weight: bold;">월 예상 유지비</span>
-                    <div class="price-tag" id="monthlyTotal">0원</div>
-                    <span style="font-size: 13px; color: #666;">(할부금 제외 순수 유지비)</span>
+            <!-- 월 예상 유지비 -->
+            <div class="result-header">
+                <div class="label">월 예상 유지비</div>
+                <div class="price-tag" id="monthlyTotal">0원</div>
+                <div class="sub">(할부금 제외 순수 유지비)</div>
+            </div>
+
+            <!-- 차량 정보 카드 -->
+            <div class="card">
+                <div class="car-info-card">
+                    <div class="car-info-title">분석된 차량</div>
+                    <div class="car-info-name" id="carModelName">-</div>
+                    <div class="car-info-grid">
+                        <div class="car-info-item">
+                            <div class="label">배기량</div>
+                            <div class="value" id="carEngineCC">-</div>
+                        </div>
+                        <div class="car-info-item">
+                            <div class="label">연비/전비</div>
+                            <div class="value" id="carFuelEff">-</div>
+                        </div>
+                        <div class="car-info-item">
+                            <div class="label">연료 타입</div>
+                            <div class="value" id="carFuelType">-</div>
+                        </div>
+                        <div class="car-info-item">
+                            <div class="label">시장 가격</div>
+                            <div class="value" id="carMarketPrice">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- 1년 상세 지출 명세서 -->
             <div class="card">
-                <h3>📊 1년 상세 지출 명세서</h3>
+                <div class="section-title">📊 1년 상세 지출 명세서</div>
                 <div class="detail-row">
-                    <span id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
-                    <span id="fuelCost" style="font-weight:bold;">0원</span>
+                    <span class="label" id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
+                    <span class="value" id="fuelCost">0원</span>
                 </div>
                 <div class="detail-row">
-                    <span>🏛 자동차세 (연납할인 미적용)</span>
-                    <span id="taxCost" style="font-weight:bold;">0원</span>
+                    <span class="label">🏛 자동차세 (연납할인 미적용)</span>
+                    <span class="value" id="taxCost">0원</span>
                 </div>
                 <div class="detail-row">
-                    <span>🛡 자동차 보험료(예상)</span>
-                    <span id="insCost" style="font-weight:bold; color: #0071e3;">0원</span>
+                    <span class="label">🛡 자동차 보험료(예상)</span>
+                    <span class="value" id="insCost">0원</span>
                 </div>
                 <div class="detail-row">
-                    <span>🔧 정비/소모품 예비비</span>
-                    <span id="repairCost" style="font-weight:bold;">0원</span>
+                    <span class="label">🔧 정비/소모품 예비비</span>
+                    <span class="value" id="repairCost">0원</span>
                 </div>
             </div>
 
+            <!-- 주요 소모품 교체 비용 -->
             <div class="card">
-                <h3>🔩 주요 소모품 교체 비용 (예상)</h3>
+                <div class="section-title">🔩 주요 소모품 교체 비용 (예상)</div>
                 <ul id="maintenanceList" class="item-list"></ul>
             </div>
 
+            <!-- 고질병 리포트 -->
             <div class="card">
-                <h3>⚠️ 구매 전 필독 (고질병 리포트)</h3>
+                <div class="section-title">⚠️ 구매 전 필독 (고질병 리포트)</div>
                 <div id="riskBox" class="risk-box"></div>
-                <p id="aiComment" style="margin-top:15px; font-size:14px; color:#555; font-style:italic; line-height: 1.5;"></p>
+                <div id="aiComment" class="ai-comment"></div>
             </div>
         </div>
 
@@ -248,7 +591,14 @@
 
                 const fmt = (n) => parseInt(n).toLocaleString() + '원';
 
-                // 데이터 바인딩
+                // 차량 정보 바인딩
+                document.getElementById('carModelName').innerText = data.specs.model_name || carModel;
+                document.getElementById('carEngineCC').innerText = data.specs.engine_cc ? `${data.specs.engine_cc}cc` : (data.specs.fuel_type === '전기' ? '전기모터' : '-');
+                document.getElementById('carFuelEff').innerText = data.specs.fuel_eff ? `${data.specs.fuel_eff}km/L` : '-';
+                document.getElementById('carFuelType').innerText = data.specs.fuel_grade || data.specs.fuel_type || '-';
+                document.getElementById('carMarketPrice').innerText = data.specs.market_price ? fmt(data.specs.market_price) : '-';
+
+                // 유지비 데이터 바인딩
                 document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
                 document.getElementById('fuelCost').innerText = fmt(data.yearly_costs.fuel_20k);
                 document.getElementById('taxCost').innerText = fmt(data.calculated.tax_year);
@@ -281,23 +631,25 @@
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-regular">💧일반유</span></span>`;
                 }
 
-                // 유지보수 항목 리스트
+                // 유지보수 항목 리스트 (개선된 스타일)
                 const list = document.getElementById('maintenanceList');
                 list.innerHTML = '';
-                if(data.maintenance_items) {
+                if(data.maintenance_items && data.maintenance_items.length > 0) {
                     data.maintenance_items.forEach(item => {
                         list.innerHTML += `<li>
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong>${item.part}</strong>
-                                <span>${fmt(item.cost)}</span>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="part-name">${item.part}</span>
+                                <span class="part-cost">${fmt(item.cost)}</span>
                             </div>
-                            <div style="font-size:12px; color:#888; margin-top:2px;">🔄 ${item.cycle}</div>
+                            <div class="part-cycle">🔄 교체 주기: ${item.cycle}</div>
                         </li>`;
                     });
+                } else {
+                    list.innerHTML = '<li style="text-align:center; color:#a0aec0;">소모품 정보가 없습니다.</li>';
                 }
 
-                document.getElementById('riskBox').innerText = data.risk_report;
-                document.getElementById('aiComment').innerText = `💡 "${data.total_comment}"`;
+                document.getElementById('riskBox').innerText = data.risk_report || '특별한 고질병 정보가 없습니다.';
+                document.getElementById('aiComment').innerText = `💡 ${data.total_comment || 'AI 분석 완료'}`;
 
                 result.style.display = 'block';
 
