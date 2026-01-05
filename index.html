@@ -214,7 +214,18 @@
                     })
                 });
 
-                const data = await response.json();
+                // [중요] 데이터를 변수(let)로 선언해야 덮어쓰기 가능
+                let data = await response.json();
+                
+                // ★★★ [배열 껍질 벗기기 - 핵심 해결책] ★★★
+                // n8n 응답이 [{...}] 형태라면 첫 번째 요소만 꺼냅니다.
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log("배열 데이터 감지됨. 첫 번째 항목 추출:", data[0]);
+                    data = data[0];
+                } else {
+                    console.log("객체 데이터 감지됨:", data);
+                }
+
                 const fmt = (n) => parseInt(n).toLocaleString() + '원';
 
                 // 데이터 바인딩
@@ -225,31 +236,43 @@
                 document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
 
                 // =======================================================
-                // [배지 및 텍스트 처리 로직] 전기차 판단 기준을 명확히 수정
+                // [배지 및 텍스트 처리 로직]
                 // =======================================================
                 const badgeSpan = document.getElementById('fuelBadge');
                 const fuelLabel = document.getElementById('fuelLabel');
                 
-                // 백엔드에서 계산된 확실한 '전기차 여부' 플래그 사용
-                // (백엔드 자바스크립트 코드 수정이 선행되어 있어야 함)
-                const isEV = (data.calculated && data.calculated.is_electric === true);
-                const fuelGrade = data.specs.fuel_grade || "";
+                // 1. 백엔드 플래그 확인 (안전하게 chaining)
+                let isEV = (data.calculated && data.calculated.is_electric === true);
+                
+                // 2. 텍스트 확인 (보조 수단)
+                const fuelGrade = (data.specs.fuel_grade || "").toLowerCase();
+                const fuelType = (data.specs.fuel_type || "").toLowerCase();
+                
+                if (fuelGrade.includes("전기") || fuelGrade.includes("electric") || fuelType.includes("전기")) {
+                    isEV = true;
+                }
 
+                // 3. [최후의 보루] 연료비가 100만원 이하인데 하이브리드가 아니면 전기차로 간주
+                if (!isEV && data.yearly_costs.fuel_20k < 1000000 && !fuelGrade.includes("hybrid") && !fuelGrade.includes("하이브리드")) {
+                    console.log("연료비가 저렴하여 전기차로 자동 보정했습니다.");
+                    isEV = true;
+                }
+
+                // [렌더링]
                 if (isEV) {
-                    // 전기차일 경우
+                    // 전기차
                     badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
-                    // 텍스트도 '충전비'로 변경 (선택사항)
                     fuelLabel.innerHTML = `⚡ 연간 충전비 (12,000km) <span id="fuelBadge"><span class="badge badge-electric">⚡전기</span></span>`;
-                } else if(fuelGrade.includes("고급") || fuelGrade.includes("Premium")) {
+                } else if(fuelGrade.includes("고급") || fuelGrade.includes("premium")) {
                     // 고급유
                     badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-premium">🔥고급유</span></span>`;
-                } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤") || fuelGrade.includes("Diesel")) {
+                } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤") || fuelGrade.includes("diesel")) {
                     // 디젤
                     badgeSpan.innerHTML = `<span class="badge badge-diesel">⛽경유</span>`;
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-diesel">⛽경유</span></span>`;
                 } else {
-                    // 일반유 (기본)
+                    // 일반유
                     badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
                     fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-regular">💧일반유</span></span>`;
                 }
