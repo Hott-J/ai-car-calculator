@@ -146,41 +146,36 @@
             margin-bottom: 32px;
         }
 
-        /* 퀵 액션 버튼들 */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 32px;
-            max-width: 600px;
+        /* 예시 프롬프트 */
+        .example-prompts {
+            margin-top: 40px;
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 24px 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
         }
 
-        .action-btn {
-            background: linear-gradient(135deg, var(--bg-blue) 0%, var(--bg-blue-light) 100%);
-            border: 2px solid var(--border-blue);
-            padding: 20px 24px;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-            font-size: 15px;
+        .example-label {
+            font-size: 14px;
             font-weight: 600;
             color: var(--primary-blue);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+            margin-bottom: 12px;
         }
 
-        .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
-            border-color: var(--primary-blue-light);
+        .example-item {
+            font-size: 15px;
+            color: var(--text-primary);
+            line-height: 2;
+            opacity: 0.8;
+            transition: opacity 0.2s;
         }
 
-        .action-icon {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 8px;
+        .example-item:hover {
+            opacity: 1;
         }
 
         /* 메시지 스타일 */
@@ -477,8 +472,8 @@
                 font-size: 28px;
             }
 
-            .quick-actions {
-                grid-template-columns: 1fr;
+            .example-prompts {
+                padding: 20px 24px;
             }
 
             .message-bubble {
@@ -523,20 +518,15 @@
                         차량에 관한 모든 것, AI에게 물어보세요
                     </div>
                     <div class="welcome-subtitle">
-                        유지비 계산과 중고차 가격 조회를<br>
                         자연스러운 대화로 빠르게 확인하세요
                     </div>
 
-                    <!-- 퀵 액션 버튼 -->
-                    <div class="quick-actions">
-                        <button class="action-btn" onclick="quickAction('유지비')">
-                            <span class="action-icon">💰</span>
-                            유지비 계산하기
-                        </button>
-                        <button class="action-btn" onclick="quickAction('가격')">
-                            <span class="action-icon">📊</span>
-                            가격 조회하기
-                        </button>
+                    <!-- 예시 프롬프트 -->
+                    <div class="example-prompts">
+                        <div class="example-label">예를 들어:</div>
+                        <div class="example-item">• "BMW 520d 2020년식 유지비 알려줘"</div>
+                        <div class="example-item">• "벨로스터 2019 중고차 시세는?"</div>
+                        <div class="example-item">• "아반떼 CN7 월 유지비 얼마야?"</div>
                     </div>
                 </div>
             </div>
@@ -560,7 +550,7 @@
 
     <script>
         // 버전 확인 (캐시 디버깅용)
-        console.log('🚀 Car Agent v2.1 - UX 개선 버전 (로고 홈, 퀵액션 예시)');
+        console.log('🚀 Car Agent v2.2 - 옵션2 적용 (퀵액션 제거, 예시 텍스트)');
         console.log('로드 시간:', new Date().toLocaleTimeString());
 
         // 세션 ID 생성
@@ -588,7 +578,6 @@
         // 홈 화면으로 리셋
         function resetToHome() {
             const chatMessages = document.getElementById('chatMessages');
-            const welcomeSection = document.getElementById('welcomeSection');
 
             // 모든 메시지 삭제하고 웰컴 섹션만 남기기
             chatMessages.innerHTML = `
@@ -598,20 +587,15 @@
                         차량에 관한 모든 것, AI에게 물어보세요
                     </div>
                     <div class="welcome-subtitle">
-                        유지비 계산과 중고차 가격 조회를<br>
                         자연스러운 대화로 빠르게 확인하세요
                     </div>
 
-                    <!-- 퀵 액션 버튼 -->
-                    <div class="quick-actions">
-                        <button class="action-btn" onclick="quickAction('유지비')">
-                            <span class="action-icon">💰</span>
-                            유지비 계산하기
-                        </button>
-                        <button class="action-btn" onclick="quickAction('가격')">
-                            <span class="action-icon">📊</span>
-                            가격 조회하기
-                        </button>
+                    <!-- 예시 프롬프트 -->
+                    <div class="example-prompts">
+                        <div class="example-label">예를 들어:</div>
+                        <div class="example-item">• "BMW 520d 2020년식 유지비 알려줘"</div>
+                        <div class="example-item">• "벨로스터 2019 중고차 시세는?"</div>
+                        <div class="example-item">• "아반떼 CN7 월 유지비 얼마야?"</div>
                     </div>
                 </div>
             `;
@@ -619,22 +603,6 @@
             // 입력창 초기화
             chatInput.value = '';
             chatInput.style.height = 'auto';
-        }
-
-        // 퀵 액션 버튼 - 예시 메시지를 봇이 먼저 보여주기
-        function quickAction(type) {
-            // 웰컴 섹션 숨기기
-            const welcomeSection = document.getElementById('welcomeSection');
-            if (welcomeSection) {
-                welcomeSection.style.display = 'none';
-            }
-
-            // 각 타입별 예시 메시지를 봇이 보여줌
-            if (type === '유지비') {
-                addMessage('💰 **유지비 계산 서비스**입니다.\n\n다음과 같이 질문해주세요:\n\n• "BMW 520d 2020년식 유지비 알려줘"\n• "아반떼 CN7 유지비 계산해줘"\n• "제네시스 G80 월 유지비 얼마야?"\n\n**차량명**과 **연식**을 알려주시면 정확한 계산이 가능합니다!', 'bot');
-            } else if (type === '가격') {
-                addMessage('📊 **중고차 가격 조회 서비스**입니다.\n\n다음과 같이 질문해주세요:\n\n• "벨로스터 2019년식 가격 알려줘"\n• "K5 2021년 중고차 시세는?"\n• "그랜저 2020년형 얼마야?"\n\n**차량명**과 **연식**을 알려주시면 최신 시세를 확인해드립니다!', 'bot');
-            }
         }
 
         // 메시지 전송
