@@ -638,14 +638,84 @@
                 // 타이핑 인디케이터 제거
                 removeTypingIndicator(typingId);
 
-                // 봇 응답 추가
-                addMessage(data.reply || '응답을 받지 못했습니다.', 'bot');
+                // 응답 처리: JSON 구조화 데이터 또는 일반 텍스트
+                if (data.reply) {
+                    // 일반 텍스트 응답
+                    addMessage(data.reply, 'bot');
+                } else if (data.calculated) {
+                    // 유지비 계산 결과 (구조화된 JSON)
+                    const formattedReply = formatMaintenanceData(data);
+                    addMessage(formattedReply, 'bot');
+                } else {
+                    addMessage('응답을 받지 못했습니다.', 'bot');
+                }
 
             } catch (error) {
                 console.error('채팅 오류:', error);
                 removeTypingIndicator(typingId);
                 addMessage('죄송합니다. 일시적인 오류가 발생했습니다.', 'bot');
             }
+        }
+
+        // 유지비 데이터를 마크다운으로 포맷팅
+        function formatMaintenanceData(data) {
+            const fmt = (num) => num.toLocaleString('ko-KR');
+
+            let md = `## 🚗 ${data.specs.model_name}\n\n`;
+
+            // 주의 메시지 (있는 경우)
+            if (data.notice_message) {
+                md += `${data.notice_message}\n\n`;
+            }
+
+            // 월 유지비
+            md += `### 💰 월 예상 유지비\n`;
+            md += `**${fmt(data.calculated.total_monthly)}원**\n\n`;
+
+            // 연간 비용 상세
+            md += `### 📊 연간 비용 상세\n`;
+            md += `* **자동차세**: ${fmt(data.yearly_costs.tax)}원\n`;
+            md += `* **보험료**: ${fmt(data.yearly_costs.insurance)}원\n`;
+            md += `* **연료비** (연 12,000km): ${fmt(data.yearly_costs.fuel_20k)}원\n`;
+            md += `* **정비 예비비**: ${fmt(data.yearly_costs.repair_fund)}원\n\n`;
+
+            // 차량 제원
+            md += `### 🔧 차량 제원\n`;
+            md += `* **배기량**: ${fmt(data.specs.engine_cc)}cc\n`;
+            md += `* **연비**: ${data.specs.fuel_eff}km/L\n`;
+            md += `* **연료 종류**: ${data.specs.fuel_grade} (${data.specs.fuel_type})\n`;
+            md += `* **차량 시세**: ${fmt(data.specs.market_price)}원\n\n`;
+
+            // 주요 소모품
+            if (data.maintenance_items && data.maintenance_items.length > 0) {
+                md += `### 🔩 주요 소모품 교체 비용\n`;
+                data.maintenance_items.forEach(item => {
+                    md += `* **${item.part}**: ${fmt(item.cost)}원 (${item.cycle})\n`;
+                });
+                md += `\n`;
+            }
+
+            // 고질병 정보
+            if (data.risk_report) {
+                md += `### ⚠️ 고질병 정보\n`;
+                md += `${data.risk_report}\n\n`;
+            }
+
+            // 종합 의견
+            if (data.total_comment) {
+                md += `### 💡 종합 의견\n`;
+                md += `${data.total_comment}\n\n`;
+            }
+
+            // 외부 링크
+            if (data.external_links) {
+                md += `### 🔗 유용한 링크\n`;
+                md += `* [중고차 시세 확인](${data.external_links.used_market})\n`;
+                md += `* [유튜브 시승기](${data.external_links.youtube_review})\n`;
+                md += `* [이미지 검색](${data.external_links.image_search})\n`;
+            }
+
+            return md;
         }
 
         // 간단한 마크다운 파서
