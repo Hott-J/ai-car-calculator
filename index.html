@@ -3,950 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>자동차 유지비 계산기 | 차량 유지비 AI 정밀 분석 - Car Agent</title>
-    
-    <meta name="description" content="자동차 유지비 계산기 - 차량 모델, 연식만 입력하면 AI가 보험료, 세금, 유류비, 정비비를 정밀 분석! 내 차 월 유지비를 지금 무료로 확인하세요.">
-    
+
+    <title>Car Agent AI - 자동차 전문 AI 어시스턴트</title>
+
+    <meta name="description" content="Car Agent AI - 자동차에 관한 모든 것을 물어보세요. 유지비 계산, 차량 추천, 중고차 시세, 정비 정보까지 AI가 답변해드립니다.">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1e3a8a;
+            --primary-blue-light: #3b82f6;
+            --primary-blue-lighter: #60a5fa;
+            --bg-blue: #f0f9ff;
+            --bg-blue-light: #e0f2fe;
+            --border-blue: #bfdbfe;
+            --success-green: #10b981;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+        }
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            color: #1d1d1f;
-            line-height: 1.6;
-            position: relative;
-        }
-
-        /* 배경 이미지 컨테이너 (모바일 호환) */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80') center/cover no-repeat;
-            z-index: -2;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.4) 100%);
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
-            z-index: -1;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow:
-                0 10px 30px rgba(0,0,0,0.12),
-                0 0 0 1px rgba(255, 255, 255, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
-            margin-bottom: 16px;
-            animation: fadeInUp 0.5s ease-out;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
-            border-radius: 20px 20px 0 0;
-            pointer-events: none;
-        }
-
-        .card:hover {
-            transform: scale(1.015);
-            box-shadow:
-                0 20px 50px rgba(0,0,0,0.18),
-                0 0 0 1px rgba(102, 126, 234, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 1),
-                0 0 30px rgba(102, 126, 234, 0.2);
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 12px;
-            font-size: 32px;
-            font-weight: 800;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: rgba(255,255,255,0.9);
-            font-size: 15px;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
-
-        .input-group { margin-bottom: 18px; }
-
-        .input-hint {
-            margin-top: 8px;
-            padding: 12px;
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-left: 3px solid #f59e0b;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #78350f;
-        }
-
-        .input-hint strong {
-            color: #92400e;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            background-color: #f7fafc;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            background-color: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 17px;
-            margin-top: 12px;
-            transition: all 0.3s;
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6);
-        }
-
-        button:active {
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-
-        button:disabled::before {
-            display: none;
-        }
-
-        .result-header {
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
-            color: white;
-            padding: 32px;
-            border-radius: 24px;
-            text-align: center;
-            margin-bottom: 16px;
-            box-shadow:
-                0 25px 60px rgba(30, 64, 175, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            transform: perspective(1000px) translateZ(0);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            position: relative;
-            overflow: visible;
-        }
-
-        .result-header:hover {
-            transform: perspective(1000px) translateZ(10px) translateY(-5px);
-            box-shadow:
-                0 35px 80px rgba(30, 64, 175, 0.6),
-                0 0 0 1px rgba(255, 255, 255, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .result-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-            border-radius: 24px 24px 0 0;
-            pointer-events: none;
-        }
-
-        .result-header .label {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .price-tag {
-            font-size: 42px;
-            font-weight: 800;
-            margin: 12px 0;
-            letter-spacing: -1px;
-        }
-
-        .result-header .sub {
-            font-size: 13px;
-            opacity: 0.85;
-        }
-
-        .car-info-card {
-            background: linear-gradient(135deg, #f6f8fb 0%, #e9eef5 100%);
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 16px;
-            box-shadow:
-                inset 0 2px 4px rgba(0,0,0,0.05),
-                0 0 0 1px rgba(0,0,0,0.05);
-            position: relative;
-        }
-
-        .car-info-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 40%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
-            border-radius: 16px 16px 0 0;
-            pointer-events: none;
-        }
-
-        .car-info-title {
-            font-size: 12px;
-            color: #718096;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .car-info-name {
-            font-size: 22px;
-            font-weight: 800;
-            color: #2d3748;
-            margin-bottom: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .model-warning {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-left: 3px solid #f59e0b;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #78350f;
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-
-        .recheck-btn {
-            width: auto;
-            padding: 6px 12px;
-            margin: 8px 0 0 0;
-            font-size: 12px;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            border-radius: 6px;
-            display: inline-block;
-        }
-
-        .recheck-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-        }
-
-        .car-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .car-info-item {
-            background: white;
-            padding: 12px;
-            border-radius: 10px;
-            box-shadow:
-                0 4px 12px rgba(0,0,0,0.08),
-                0 0 0 1px rgba(0,0,0,0.05);
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            transform: translateZ(0);
-        }
-
-        .car-info-item:hover {
-            transform: translateY(-4px) translateZ(10px);
-            box-shadow:
-                0 8px 20px rgba(0,0,0,0.12),
-                0 0 0 1px rgba(0,0,0,0.08);
-        }
-
-        .car-info-item .label {
-            font-size: 11px;
-            color: #a0aec0;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .car-info-item .value {
-            font-size: 16px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* 3D 아이콘 효과 */
-        .icon-3d {
-            display: inline-block;
-            font-size: 24px;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
-            transform: translateZ(0);
-            transition: transform 0.3s;
-        }
-
-        .section-title:hover .icon-3d {
-            transform: translateY(-3px) rotateZ(-5deg) scale(1.1);
-            filter: drop-shadow(3px 6px 8px rgba(0,0,0,0.4));
-        }
-
-        /* 가격 태그 3D 효과 */
-        .price-tag {
-            font-size: 42px;
-            font-weight: 800;
-            margin: 12px 0;
-            letter-spacing: -1px;
-            text-shadow:
-                0 2px 0 rgba(0,0,0,0.1),
-                0 4px 8px rgba(0,0,0,0.2);
-            transform: perspective(500px) translateZ(20px);
-            transition: all 0.3s;
-        }
-
-        .result-header:hover .price-tag {
-            transform: perspective(500px) translateZ(30px) scale(1.05);
-            text-shadow:
-                0 3px 0 rgba(0,0,0,0.15),
-                0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .detail-row:last-child { border-bottom: none; }
-
-        .detail-row .label {
-            font-size: 15px;
-            color: #4a5568;
-            font-weight: 500;
-        }
-
-        .detail-row .value {
-            font-size: 17px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        /* 배지 스타일 */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        .badge-premium { background: #fee; color: #c53030; }
-        .badge-regular { background: #e6ffed; color: #22543d; }
-        .badge-diesel { background: #e2e8f0; color: #2d3748; }
-        .badge-electric { background: #ebf8ff; color: #2c5282; }
-
-        .risk-box {
-            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
-            border-left: 4px solid #fc8181;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.7;
-            word-break: keep-all;
-            color: #742a2a;
-        }
-
-        .ai-comment {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            border-left: 4px solid #667eea;
-            padding: 18px;
-            border-radius: 12px;
-            margin-top: 16px;
-            font-size: 14px;
-            line-height: 1.7;
-            color: #4a5568;
-            font-style: italic;
-        }
-
-        .item-list { list-style: none; padding: 0; }
-
-        .item-list li {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            padding: 16px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            border-left: 3px solid #667eea;
-            transition: transform 0.2s;
-        }
-
-        .item-list li:hover {
-            transform: translateX(4px);
-        }
-
-        .item-list .part-name {
-            font-weight: 700;
-            color: #2d3748;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .item-list .part-cost {
-            font-weight: 700;
-            color: #667eea;
-            font-size: 16px;
-        }
-
-        .item-list .part-cycle {
-            font-size: 12px;
-            color: #a0aec0;
-            margin-top: 4px;
-        }
-
-        .loading {
-            text-align: center;
-            display: none;
-            padding: 40px;
-            color: white;
-            font-weight: 600;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .seo-content {
-            margin-top: 50px;
-            padding: 24px;
-            background: white;
-            border-radius: 20px;
-            color: #4a5568;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .seo-content h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: #2d3748;
-            font-weight: 700;
-        }
-
-        .seo-content h3 {
-            font-size: 17px;
-            margin-top: 28px;
-            margin-bottom: 12px;
-            color: #2d3748;
-            font-weight: 700;
-        }
-
-        .seo-content p {
-            font-size: 15px;
-            line-height: 1.8;
-            margin-bottom: 16px;
-            color: #4a5568;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            color: rgba(255,255,255,0.7);
-            font-size: 13px;
-            padding-bottom: 30px;
-        }
-
-        footer p { margin: 8px 0; }
-
-        /* 외부 링크 버튼 */
-        .quick-links {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 16px;
-        }
-
-        .link-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border: 1.5px solid #cbd5e0;
-            border-radius: 12px;
-            text-decoration: none;
-            color: #2d3748;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-
-        .link-btn:hover {
-            transform: translateY(-2px);
-            border-color: #667eea;
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-
-        .link-btn .icon {
-            font-size: 16px;
-        }
-
-        /* 소모품 검색 버튼 */
-        .part-search-btn {
-            padding: 4px 10px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-left: 8px;
-        }
-
-        .part-search-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-        }
-
-        /* 채팅봇 UI - 전문 AI 로봇 테마 */
-        .chat-widget {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 1000;
-        }
-
-        .chat-toggle-btn {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            color: white;
-            font-size: 36px;
-            cursor: grab;
-            box-shadow:
-                0 8px 25px rgba(59, 130, 246, 0.4),
-                0 0 0 0 rgba(59, 130, 246, 0.7);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            animation: pulse 3s ease-in-out infinite;
-            user-select: none;
-        }
-
-        .chat-toggle-btn:active {
-            cursor: grabbing;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow:
-                    0 8px 25px rgba(59, 130, 246, 0.4),
-                    0 0 0 0 rgba(59, 130, 246, 0.7);
-            }
-            50% {
-                box-shadow:
-                    0 8px 35px rgba(59, 130, 246, 0.6),
-                    0 0 0 8px rgba(59, 130, 246, 0);
-            }
-        }
-
-        .chat-toggle-btn:hover {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #1e40af 0%, #60a5fa 100%);
-            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6);
-            animation: none;
-        }
-
-        .chat-toggle-btn::before {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            top: 10px;
-            right: 10px;
-            border: 2px solid white;
-            animation: blink 2s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .chat-window {
-            position: absolute;
-            bottom: 88px;
-            right: 0;
-            width: 400px;
-            height: 550px;
-            background: white;
-            border-radius: 20px;
-            box-shadow:
-                0 20px 60px rgba(30, 58, 138, 0.15),
-                0 0 0 1px rgba(59, 130, 246, 0.1);
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-window.open {
-            display: flex;
-            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            padding: 18px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            box-shadow: 0 2px 10px rgba(30, 58, 138, 0.2);
-        }
-
-        .chat-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg,
-                rgba(59, 130, 246, 0) 0%,
-                rgba(59, 130, 246, 0.8) 50%,
-                rgba(59, 130, 246, 0) 100%);
-        }
-
-        .chat-header h3 {
             margin: 0;
-            font-size: 17px;
-            font-weight: 600;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 헤더 */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 16px 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            letter-spacing: -0.3px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-blue);
         }
 
-        .chat-header h3::before {
-            content: '🤖';
-            font-size: 24px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        .logo-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
         }
 
-        .chat-header-status {
+        .nav-menu {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            opacity: 0.9;
-            margin-left: auto;
-            margin-right: 8px;
+            gap: 16px;
         }
 
-        .chat-header-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: blink 2s infinite;
-        }
-
-        .chat-close {
+        .nav-btn {
             background: none;
             border: none;
-            color: white;
-            font-size: 24px;
+            color: var(--text-gray);
+            font-size: 14px;
             cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
         }
 
+        .nav-btn:hover {
+            background: var(--bg-blue);
+            color: var(--primary-blue);
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+            gap: 20px;
+        }
+
+        /* 채팅 컨테이너 */
+        .chat-container {
+            flex: 1;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        /* 채팅 메시지 영역 */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 16px;
-            background: #f7fafc;
+            padding: 32px 24px;
+            background: linear-gradient(to bottom, #fafbff 0%, #ffffff 100%);
         }
 
-        .chat-message {
+        /* 웰컴 섹션 */
+        .welcome-section {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .welcome-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-blue);
             margin-bottom: 12px;
-            animation: fadeIn 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .welcome-subtitle {
+            font-size: 16px;
+            color: var(--text-gray);
+            margin-bottom: 32px;
         }
 
-        .chat-message.user {
-            text-align: right;
+        /* 퀵 액션 버튼들 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 32px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .chat-message.bot {
+        .action-btn {
+            background: linear-gradient(135deg, var(--bg-blue) 0%, var(--bg-blue-light) 100%);
+            border: 2px solid var(--border-blue);
+            padding: 20px 24px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
             text-align: left;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
         }
 
-        .message-bubble {
-            display: inline-block;
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-            word-wrap: break-word;
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+            border-color: var(--primary-blue-light);
         }
 
-        .chat-message.user .message-bubble {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .action-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .chat-message.bot {
+        /* 메시지 스타일 */
+        .message {
+            margin-bottom: 24px;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.bot {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .chat-message.bot::before {
-            content: '🤖';
-            font-size: 26px;
+        .bot-avatar {
+            font-size: 32px;
             flex-shrink: 0;
             filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
         }
 
-        .chat-message.bot .message-bubble {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            color: #1e293b;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
-            border: 1px solid #bfdbfe;
-            position: relative;
+        .message-bubble {
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
-        .chat-message.bot .message-bubble::before {
-            content: '';
-            position: absolute;
-            left: -6px;
-            top: 12px;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0 6px 6px 0;
-            border-color: transparent #bfdbfe transparent transparent;
-        }
-
-        .chat-message.bot .message-bubble::after {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: 13px;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0 5px 5px 0;
-            border-color: transparent #f0f9ff transparent transparent;
-        }
-
-        .chat-input-area {
-            padding: 12px 16px;
-            background: white;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1.5px solid #e0e7ff;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s;
-            background: #fafbff;
-        }
-
-        .chat-input:focus {
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .chat-send-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
             color: white;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            border-radius: 16px 16px 4px 16px;
         }
 
-        .chat-send-btn:hover {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #1e40af 0%, #60a5fa 100%);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        .message.bot .message-bubble {
+            background: linear-gradient(135deg, var(--bg-blue) 0%, var(--bg-blue-light) 100%);
+            color: var(--text-dark);
+            border: 1px solid var(--border-blue);
+            border-radius: 16px 16px 16px 4px;
         }
 
-        .chat-send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
+        /* 타이핑 인디케이터 */
         .typing-indicator {
             display: inline-flex;
             gap: 5px;
-            padding: 12px 16px;
-            align-items: center;
+            padding: 12px 18px;
         }
 
         .typing-indicator span {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #3b82f6;
+            background: var(--primary-blue-light);
             animation: typing 1.4s infinite ease-in-out;
         }
 
@@ -955,525 +244,285 @@
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-                opacity: 0.4;
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        /* 입력 영역 */
+        .input-container {
+            padding: 20px 24px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border-blue);
+            border-radius: 16px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+            background: var(--bg-blue);
+            font-family: inherit;
+            resize: none;
+            min-height: 52px;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-blue-light);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            30% {
-                transform: translateY(-10px);
+            to {
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 600px) {
-            .chat-window {
-                width: calc(100vw - 24px);
-                height: 75vh;
-                bottom: 80px;
-                right: 12px;
-                left: 12px;
+        /* 상태 인디케이터 */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-gray);
+            padding: 6px 12px;
+            background: var(--bg-blue);
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success-green);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
             }
 
-            .chat-widget {
-                right: 16px;
-                bottom: 16px;
-            }
-
-            .chat-toggle-btn {
-                width: 64px;
-                height: 64px;
-                font-size: 34px;
-            }
-
-            .chat-toggle-btn::after {
+            .logo {
                 font-size: 18px;
             }
 
-            .chat-header h3 {
-                font-size: 16px;
+            .main-container {
+                padding: 12px;
             }
 
-            .chat-message.bot::before {
-                font-size: 24px;
+            .chat-container {
+                min-height: calc(100vh - 100px);
+                border-radius: 20px;
             }
-        }
 
-        @media (max-width: 600px) {
-            .quick-links {
+            .welcome-title {
+                font-size: 28px;
+            }
+
+            .quick-actions {
                 grid-template-columns: 1fr;
             }
-        }
 
-        /* 모바일 최적화 */
-        @media (max-width: 600px) {
-            .flip-container {
-                min-height: 180px;
+            .message-bubble {
+                max-width: 85%;
             }
 
-            .flip-container.flipped {
-                min-height: 420px;
+            .nav-menu {
+                gap: 8px;
             }
-        }
 
-        /* 카드 플립 효과 */
-        .flip-container {
-            perspective: 1500px;
-            margin-bottom: 16px;
-            min-height: 200px;
-            transition: min-height 0.8s ease;
-        }
-
-        .flip-container.flipped {
-            min-height: 350px;
-        }
-
-        .flipper {
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .flip-container.flipped .flipper {
-            transform: rotateY(180deg);
-        }
-
-        .flip-front, .flip-back {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-
-        .flip-front {
-            position: relative;
-            z-index: 2;
-        }
-
-        .flip-back {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            transform: rotateY(180deg);
-        }
-
-        /* 클릭 힌트 */
-        .click-hint {
-            position: absolute;
-            bottom: 12px;
-            right: 16px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.7);
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px 10px;
-            border-radius: 12px;
-            animation: pulse 2s infinite;
-            pointer-events: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.05); }
-        }
-
-        .result-header {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .result-header:active {
-            transform: perspective(1000px) translateZ(5px) translateY(-2px) scale(0.98);
+            .nav-btn {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>🚗 자동차 유지비 계산기</h1>
-        <p class="subtitle">AI가 분석하는 차량 보험료, 세금, 유류비, 정비비까지 한눈에!</p>
-    </header>
-    
-    <main>
-        <div class="card">
-            <div class="input-group">
-                <label for="carModel">차량 모델명 <span style="color:red">*</span></label>
-                <input type="text" id="carModel" placeholder="예: BMW 520d, 아반떼 CN7, 테슬라 모델3">
-                <div class="input-hint">
-                    💡 <strong>구체적으로 입력할수록 정확해요!</strong><br>
-                    <span style="font-size: 12px; color: #718096;">
-                        "520" 대신 "520d" 또는 "520i"처럼 정확히 입력하면 더 정밀한 분석이 가능합니다.
-                    </span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label for="carYear">차량 연식 <span style="color:red">*</span></label>
-                <input type="number" id="carYear" placeholder="2023" value="2023">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <div class="input-group" style="flex: 1;">
-                    <label for="birthYear">출생년도 <span style="color:red">*</span></label>
-                    <input type="number" id="birthYear" placeholder="1995" value="1995">
-                </div>
-                <div class="input-group" style="flex: 1;">
-                    <label for="drivingExp">운전 경력 <span style="color:red">*</span></label>
-                    <select id="drivingExp">
-                        <option value="0">신규 (0년)</option>
-                        <option value="1">1~2년</option>
-                        <option value="3">3년 이상</option>
-                    </select>
-                </div>
-            </div>
-            <button onclick="calculate()">💰 AI 정밀 유지비 분석 시작</button>
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="logo">
+            <span class="logo-icon">🤖</span>
+            <span>Car Agent AI</span>
         </div>
-
-        <div id="loading" class="loading">
-            <div class="loading-spinner"></div>
-            <p><strong>Car Agent</strong>가 고객님의 조건과<br>실시간 유가/보험 데이터를 분석 중입니다...</p>
-        </div>
-
-        <div id="result" style="display:none;">
-            <!-- 플립 카드 컨테이너 -->
-            <div class="flip-container" id="flipCard">
-                <div class="flipper">
-                    <!-- 앞면: 월 예상 유지비 -->
-                    <div class="flip-front">
-                        <div class="result-header" onclick="flipCard()">
-                            <div class="label">월 예상 유지비</div>
-                            <div class="price-tag" id="monthlyTotal">0원</div>
-                            <div class="sub">(할부금 제외 순수 유지비)</div>
-                            <div class="click-hint">👆 클릭하여 상세보기</div>
-                        </div>
-                    </div>
-
-                    <!-- 뒷면: 1년 상세 지출 명세서 -->
-                    <div class="flip-back">
-                        <div class="card" onclick="flipCard()" style="cursor: pointer; margin-bottom: 0;">
-                            <div class="section-title"><span class="icon-3d">📊</span> 1년 상세 지출 명세서</div>
-                            <div class="detail-row">
-                                <span class="label" id="fuelLabel">⛽ 연간 주유비 (12,000km) <span id="fuelBadge"></span></span>
-                                <span class="value" id="fuelCost">0원</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">🏛 자동차세 (연납할인 미적용)</span>
-                                <span class="value" id="taxCost">0원</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">🛡 자동차 보험료(예상)</span>
-                                <span class="value" id="insCost">0원</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">🔧 정비/소모품 예비비</span>
-                                <span class="value" id="repairCost">0원</span>
-                            </div>
-                            <div class="click-hint" style="bottom: 16px;">👆 클릭하여 돌아가기</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 차량 정보 카드 -->
-            <div class="card">
-                <div class="car-info-card">
-                    <div class="car-info-title">🤖 AI가 분석한 차량</div>
-                    <div class="car-info-name" id="carModelName">-</div>
-                    <div id="modelWarning" class="model-warning" style="display: none;">
-                        ⚠️ 다른 모델을 찾으셨나요?
-                        <span id="userInputModel" style="font-weight: 600;"></span>
-                        <button onclick="scrollToInput()" class="recheck-btn">🔄 다시 검색하기</button>
-                    </div>
-                    <div class="car-info-grid">
-                        <div class="car-info-item">
-                            <div class="label">배기량</div>
-                            <div class="value" id="carEngineCC">-</div>
-                        </div>
-                        <div class="car-info-item">
-                            <div class="label">연비/전비</div>
-                            <div class="value" id="carFuelEff">-</div>
-                        </div>
-                        <div class="car-info-item">
-                            <div class="label">연료 타입</div>
-                            <div class="value" id="carFuelType">-</div>
-                        </div>
-                        <div class="car-info-item">
-                            <div class="label">시장 가격</div>
-                            <div class="value" id="carMarketPrice">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 빠른 링크 -->
-                <div class="quick-links">
-                    <a id="usedCarLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
-                        <span class="icon">🚗</span>
-                        <span>중고차 시세</span>
-                    </a>
-                    <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
-                        <span class="icon">📺</span>
-                        <span>유튜브 리뷰</span>
-                    </a>
-                    <a id="insuranceLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
-                        <span class="icon">🛡</span>
-                        <span>보험 견적</span>
-                    </a>
-                    <a id="blogLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
-                        <span class="icon">📝</span>
-                        <span>블로그 후기</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 주요 소모품 교체 비용 -->
-            <div class="card">
-                <div class="section-title"><span class="icon-3d">🔩</span> 주요 소모품 교체 비용 (예상)</div>
-                <ul id="maintenanceList" class="item-list"></ul>
-            </div>
-
-            <!-- 고질병 리포트 -->
-            <div class="card">
-                <div class="section-title"><span class="icon-3d">⚠️</span> 구매 전 필독 (고질병 리포트)</div>
-                <div id="riskBox" class="risk-box"></div>
-                <div id="aiComment" class="ai-comment"></div>
+        <div class="nav-menu">
+            <button class="nav-btn" onclick="showInfo()">사용 가이드</button>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                온라인
             </div>
         </div>
+    </div>
 
-        <section class="seo-content" id="seoContent">
-            <h2>💡 자동차 유지비 계산기, 왜 필요할까요?</h2>
-            <p>
-                많은 분들이 차량 구매 시 <strong>차량 가격</strong>과 할부금만 생각하지만, 실제로 우리를 힘들게 하는 것은 매달 나가는 <strong>차 유지비</strong>입니다.
-                Car Agent 자동차 유지비 계산기는 <strong>자동차세, 보험료, 유류비(충전비), 정비 예비비</strong>를 종합적으로 분석하여 현실적인 차량 유지비를 알려드립니다.
-            </p>
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+        <div class="chat-container">
+            <!-- 채팅 메시지 영역 -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- 웰컴 섹션 -->
+                <div class="welcome-section" id="welcomeSection">
+                    <div class="welcome-title">
+                        <span>🚗</span>
+                        차량에 관한 모든 것, AI에게 물어보세요
+                    </div>
+                    <div class="welcome-subtitle">
+                        유지비 계산부터 차량 추천, 중고차 시세, 정비 정보까지<br>
+                        자연스러운 대화로 빠르게 확인하세요
+                    </div>
 
-            <h3>❓ 사회초년생 첫차, 차량 유지비 얼마나 들까?</h3>
-            <p>
-                아반떼, K3 같은 준중형 세단도 만 26세 미만이라면 <strong>자동차 보험료</strong>가 연 200만 원을 넘길 수 있습니다.
-                본 차 유지비 계산기를 통해 내 나이와 운전 경력에 맞는 정확한 자동차 유지비를 미리 확인해보세요.
-            </p>
+                    <!-- 퀵 액션 버튼 -->
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="quickAction('유지비')">
+                            <span class="action-icon">💰</span>
+                            유지비 계산하기
+                        </button>
+                        <button class="action-btn" onclick="quickAction('추천')">
+                            <span class="action-icon">🎯</span>
+                            차량 추천받기
+                        </button>
+                        <button class="action-btn" onclick="quickAction('시세')">
+                            <span class="action-icon">📊</span>
+                            중고차 시세 확인
+                        </button>
+                        <button class="action-btn" onclick="quickAction('정비')">
+                            <span class="action-icon">🔧</span>
+                            정비 정보 알아보기
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-            <h3>⚙️ 수입차/전기차 차량 유지비의 진실</h3>
-            <p>
-                수입차는 국산차 대비 <strong>부품값과 공임비가 2~3배</strong> 비쌉니다. 전기차는 충전비는 저렴하지만 <strong>보험료와 타이어 값</strong>이 비쌀 수 있습니다.
-                단순히 연료비만 계산해서는 안 되며, 워런티 만료 후 발생할 수 있는 <strong>고질병 수리비</strong>를 예비비로 잡아두는 것이 현명합니다.
-            </p>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 Car Agent. All rights reserved.</p>
-        <p>본 결과는 AI 추정치이며 실제 비용과 차이가 있을 수 있습니다.</p>
-    </footer>
+            <!-- 입력 영역 -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea
+                        class="chat-input"
+                        id="chatInput"
+                        placeholder="예: BMW 520d 유지비 알려줘"
+                        rows="1"
+                    ></textarea>
+                </div>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // ============================================================
-        // [1] 세션 ID 생성 및 관리 (메모리 기능을 위한 핵심 코드)
-        // ============================================================
+        // 세션 ID 생성
         let sessionId = localStorage.getItem('car_agent_session');
         if (!sessionId) {
-            // 세션 ID가 없으면 랜덤 생성 (시간+난수 조합)
             sessionId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
             localStorage.setItem('car_agent_session', sessionId);
         }
-        console.log("현재 세션 ID:", sessionId); // 디버깅용
 
-        // ============ 카드 UI 관련 함수 ============
-        function flipCard() {
-            const flipContainer = document.getElementById('flipCard');
-            flipContainer.classList.toggle('flipped');
+        // 텍스트 영역 자동 높이 조절
+        const chatInput = document.getElementById('chatInput');
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Enter 키로 전송 (Shift+Enter는 줄바꿈)
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 퀵 액션 버튼
+        function quickAction(type) {
+            const prompts = {
+                '유지비': '자동차 유지비를 계산하고 싶어요. 어떤 정보가 필요한가요?',
+                '추천': '예산과 용도에 맞는 차량을 추천받고 싶어요.',
+                '시세': '중고차 시세를 확인하고 싶어요.',
+                '정비': '차량 정비 정보를 알고 싶어요.'
+            };
+
+            chatInput.value = prompts[type];
+            chatInput.focus();
         }
 
-        function scrollToInput() {
-            const inputField = document.getElementById('carModel');
-            inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                inputField.focus();
-                inputField.select();
-            }, 500);
-        }
-
-        // ============ 계산기 로직 (기존 유지) ============
-        async function calculate() {
-            const btn = document.querySelector('button');
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-
-            const carModel = document.getElementById('carModel').value.trim();
-            const carYearVal = document.getElementById('carYear').value;
-            const birthYearVal = document.getElementById('birthYear').value;
-            const drivingExp = document.getElementById('drivingExp').value;
-
-            if (!carModel) {
-                alert("🚗 차량 모델명을 입력해주세요!");
-                document.getElementById('carModel').focus();
-                return;
-            }
-
-            const currentYear = new Date().getFullYear();
-            const carYear = parseInt(carYearVal);
-            const birthYear = parseInt(birthYearVal);
-            const age = currentYear - birthYear;
-
-            if (isNaN(carYear) || carYear < 1950 || carYear > currentYear + 1) {
-                alert(`📅 차량 연식을 확인해주세요.\n(1950년 ~ ${currentYear + 1}년 사이만 가능)`);
-                document.getElementById('carYear').focus();
-                return;
-            }
-
-            if (isNaN(birthYear) || age < 18) {
-                alert("🔞 만 18세 미만은 운전면허를 취득할 수 없어\n정확한 계산이 불가능합니다.");
-                document.getElementById('birthYear').focus();
-                return;
-            }
-
-            if (age > 100) {
-                alert("👴 100세 이상으로 입력되었습니다.\n정확한 출생년도를 확인해주세요.");
-                document.getElementById('birthYear').focus();
-                return;
-            }
-
-            btn.disabled = true;
-            loading.style.display = 'block';
-            result.style.display = 'none';
-
-            // 계산기 웹훅 URL
-            const webhookUrl = 'https://bot.hopto.org/webhook/car-cost-calc';
-
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        car_model: carModel,
-                        car_year: carYear,
-                        birth_year: birthYear,
-                        driving_exp: drivingExp,
-                        sessionId: sessionId // 계산기에도 세션 ID를 보내두면 나중에 로그 분석에 유리함
-                    })
-                });
-
-                let rawData = await response.json();
-
-                function normalizeData(obj) {
-                    if (!obj) return null;
-                    if (Array.isArray(obj)) return normalizeData(obj[0]);
-                    if (obj.json && obj.json.specs) return normalizeData(obj.json);
-                    if (obj.specs) return obj;
-                    return obj;
-                }
-
-                const data = normalizeData(rawData);
-
-                if (!data || !data.calculated) {
-                    throw new Error("데이터 형식이 올바르지 않습니다.");
-                }
-
-                const fmt = (n) => parseInt(n).toLocaleString() + '원';
-
-                const aiModelName = data.specs.model_name || carModel;
-                document.getElementById('carModelName').innerText = aiModelName;
-                document.getElementById('carEngineCC').innerText = data.specs.engine_cc ? `${data.specs.engine_cc}cc` : (data.specs.fuel_type === '전기' ? '전기모터' : '-');
-                document.getElementById('carFuelEff').innerText = data.specs.fuel_eff ? `${data.specs.fuel_eff}km/L` : '-';
-                document.getElementById('carFuelType').innerText = data.specs.fuel_grade || data.specs.fuel_type || '-';
-                document.getElementById('carMarketPrice').innerText = data.specs.market_price ? fmt(data.specs.market_price) : '-';
-
-                const userInput = carModel.toLowerCase().trim();
-                const aiOutput = aiModelName.toLowerCase();
-
-                if (userInput.length < 5 || !aiOutput.includes(userInput)) {
-                    document.getElementById('modelWarning').style.display = 'block';
-                    document.getElementById('userInputModel').innerText = `(입력: "${carModel}")`;
-                } else {
-                    document.getElementById('modelWarning').style.display = 'none';
-                }
-
-                const modelNameForSearch = aiModelName || carModel;
-                document.getElementById('usedCarLink').href = `https://search.naver.com/search.naver?where=web&query=${encodeURIComponent(modelNameForSearch + ' 중고차 시세')}`;
-                document.getElementById('youtubeLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(modelNameForSearch + ' 리뷰')}`;
-                document.getElementById('insuranceLink').href = `https://direct.samsungfire.com/`;
-                document.getElementById('blogLink').href = `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(modelNameForSearch + ' 후기')}`;
-
-                document.getElementById('monthlyTotal').innerText = fmt(data.calculated.total_monthly);
-                document.getElementById('fuelCost').innerText = fmt(data.yearly_costs.fuel_20k);
-                document.getElementById('taxCost').innerText = fmt(data.calculated.tax_year);
-                document.getElementById('insCost').innerText = fmt(data.yearly_costs.insurance);
-                document.getElementById('repairCost').innerText = fmt(data.yearly_costs.repair_fund);
-
-                const badgeSpan = document.getElementById('fuelBadge');
-                const fuelLabel = document.getElementById('fuelLabel');
-                const fuelGrade = (data.specs.fuel_grade || "").toLowerCase();
-
-                if (fuelGrade.includes("전기")) {
-                    badgeSpan.innerHTML = `<span class="badge badge-electric">⚡전기</span>`;
-                    fuelLabel.innerHTML = `⚡ 연간 충전비 (12,000km) <span id="fuelBadge"><span class="badge badge-electric">⚡전기</span></span>`;
-                } else if(fuelGrade.includes("고급") || fuelGrade.includes("premium")) {
-                    badgeSpan.innerHTML = `<span class="badge badge-premium">🔥고급유</span>`;
-                    fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-premium">🔥고급유</span></span>`;
-                } else if(fuelGrade.includes("경유") || fuelGrade.includes("디젤") || fuelGrade.includes("diesel")) {
-                    badgeSpan.innerHTML = `<span class="badge badge-diesel">⛽경유</span>`;
-                    fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-diesel">⛽경유</span></span>`;
-                } else {
-                    badgeSpan.innerHTML = `<span class="badge badge-regular">💧일반유</span>`;
-                    fuelLabel.innerHTML = `⛽ 연간 주유비 (12,000km) <span id="fuelBadge"><span class="badge badge-regular">💧일반유</span></span>`;
-                }
-
-                const list = document.getElementById('maintenanceList');
-                list.innerHTML = '';
-                if(data.maintenance_items && data.maintenance_items.length > 0) {
-                    data.maintenance_items.forEach(item => {
-                        const searchQuery = encodeURIComponent(`${modelNameForSearch} ${item.part}`);
-                        list.innerHTML += `<li>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="part-name">${item.part}</span>
-                                <div>
-                                    <span class="part-cost">${fmt(item.cost)}</span>
-                                    <button class="part-search-btn" onclick="window.open('https://search.shopping.naver.com/search/all?query=${searchQuery}', '_blank')">
-                                        🔍 검색
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="part-cycle">🔄 교체 주기: ${item.cycle}</div>
-                        </li>`;
-                    });
-                } else {
-                    list.innerHTML = '<li style="text-align:center; color:#a0aec0;">소모품 정보가 없습니다.</li>';
-                }
-
-                document.getElementById('riskBox').innerText = data.risk_report || '특별한 고질병 정보가 없습니다.';
-                document.getElementById('aiComment').innerText = `💡 ${data.total_comment || 'AI 분석 완료'}`;
-
-                result.style.display = 'block';
-                document.getElementById('seoContent').style.display = 'none';
-
-            } catch (error) {
-                alert('계산 중 오류가 발생했습니다.\n' + error.message);
-                console.error(error);
-            } finally {
-                btn.disabled = false;
-                loading.style.display = 'none';
-            }
-        }
-
-        // ============ 채팅봇 관련 함수 ============
-        function toggleChat() {
-            const chatWindow = document.getElementById('chatWindow');
-            const isOpen = chatWindow.style.display === 'flex';
-            chatWindow.style.display = isOpen ? 'none' : 'flex';
-
-            if (!isOpen) {
-                document.getElementById('chatInput').focus();
-            }
-        }
-
+        // 메시지 전송
         async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-
+            const message = chatInput.value.trim();
             if (!message) return;
 
-            addMessage(message, 'user');
-            input.value = '';
+            // 웰컴 섹션 숨기기
+            const welcomeSection = document.getElementById('welcomeSection');
+            if (welcomeSection) {
+                welcomeSection.style.display = 'none';
+            }
 
-            const typingId = 'typing-' + Date.now();
-            addTypingIndicator(typingId);
+            // 사용자 메시지 추가
+            addMessage(message, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // 타이핑 인디케이터 표시
+            const typingId = addTypingIndicator();
 
             try {
-                // [2] n8n 채팅 웹훅으로 메시지 전송 (sessionId 포함!)
+                // n8n 웹훅으로 전송
                 const response = await fetch('https://bot.hopto.org/webhook/1217a495-1bb2-4a90-a56c-4497f248c1ec', {
                     method: 'POST',
                     headers: {
@@ -1481,14 +530,17 @@
                     },
                     body: JSON.stringify({
                         message: message,
-                        sessionId: sessionId, // ★★★ 여기가 핵심입니다 (세션 ID 전송)
+                        sessionId: sessionId,
                         timestamp: new Date().toISOString()
                     })
                 });
 
                 const data = await response.json();
 
+                // 타이핑 인디케이터 제거
                 removeTypingIndicator(typingId);
+
+                // 봇 응답 추가
                 addMessage(data.reply || '응답을 받지 못했습니다.', 'bot');
 
             } catch (error) {
@@ -1498,31 +550,50 @@
             }
         }
 
+        // 메시지 추가
         function addMessage(text, sender) {
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.className = `message ${sender}`;
 
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = 'message-bubble';
-            bubbleDiv.textContent = text;
+            if (sender === 'bot') {
+                messageDiv.innerHTML = `
+                    <div class="bot-avatar">🤖</div>
+                    <div class="message-bubble">${text}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-bubble">${text}</div>
+                `;
+            }
 
-            messageDiv.appendChild(bubbleDiv);
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function addTypingIndicator(id) {
+        // 타이핑 인디케이터 추가
+        function addTypingIndicator() {
             const messagesContainer = document.getElementById('chatMessages');
+            const typingId = 'typing-' + Date.now();
             const typingDiv = document.createElement('div');
-            typingDiv.id = id;
-            typingDiv.className = 'chat-message bot';
-            typingDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+            typingDiv.id = typingId;
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = `
+                <div class="bot-avatar">🤖</div>
+                <div class="message-bubble">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
 
             messagesContainer.appendChild(typingDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            return typingId;
         }
 
+        // 타이핑 인디케이터 제거
         function removeTypingIndicator(id) {
             const typingElement = document.getElementById(id);
             if (typingElement) {
@@ -1530,142 +601,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatInput = document.getElementById('chatInput');
-            if (chatInput) {
-                chatInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        sendMessage();
-                    }
-                });
-            }
-
-            // ============ 채팅봇 드래그 기능 ============
-            const chatWidget = document.querySelector('.chat-widget');
-            const chatToggleBtn = document.querySelector('.chat-toggle-btn');
-            let isDragging = false;
-            let startX, startY, initialRight, initialBottom;
-            let hasMoved = false;
-
-            chatToggleBtn.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                hasMoved = false;
-                startX = e.clientX;
-                startY = e.clientY;
-
-                const rect = chatWidget.getBoundingClientRect();
-                initialRight = window.innerWidth - rect.right;
-                initialBottom = window.innerHeight - rect.bottom;
-
-                chatWidget.style.transition = 'none';
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-
-                const deltaX = startX - e.clientX;
-                const deltaY = startY - e.clientY;
-
-                // 5px 이상 움직였으면 드래그로 간주
-                if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                    hasMoved = true;
-                }
-
-                const newRight = initialRight + deltaX;
-                const newBottom = initialBottom + deltaY;
-
-                // 화면 밖으로 나가지 않도록 제한
-                const maxRight = window.innerWidth - 80;
-                const maxBottom = window.innerHeight - 80;
-
-                chatWidget.style.right = Math.max(10, Math.min(newRight, maxRight)) + 'px';
-                chatWidget.style.bottom = Math.max(10, Math.min(newBottom, maxBottom)) + 'px';
-            });
-
-            document.addEventListener('mouseup', function(e) {
-                if (isDragging) {
-                    isDragging = false;
-                    chatWidget.style.transition = '';
-
-                    // 드래그하지 않고 클릭만 했을 때만 채팅창 열기
-                    if (!hasMoved) {
-                        toggleChat();
-                    }
-                }
-            });
-
-            // 터치 이벤트 (모바일)
-            chatToggleBtn.addEventListener('touchstart', function(e) {
-                isDragging = true;
-                hasMoved = false;
-                const touch = e.touches[0];
-                startX = touch.clientX;
-                startY = touch.clientY;
-
-                const rect = chatWidget.getBoundingClientRect();
-                initialRight = window.innerWidth - rect.right;
-                initialBottom = window.innerHeight - rect.bottom;
-
-                chatWidget.style.transition = 'none';
-                e.preventDefault();
-            }, { passive: false });
-
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-
-                const touch = e.touches[0];
-                const deltaX = startX - touch.clientX;
-                const deltaY = startY - touch.clientY;
-
-                if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                    hasMoved = true;
-                }
-
-                const newRight = initialRight + deltaX;
-                const newBottom = initialBottom + deltaY;
-
-                const maxRight = window.innerWidth - 80;
-                const maxBottom = window.innerHeight - 80;
-
-                chatWidget.style.right = Math.max(10, Math.min(newRight, maxRight)) + 'px';
-                chatWidget.style.bottom = Math.max(10, Math.min(newBottom, maxBottom)) + 'px';
-            }, { passive: false });
-
-            document.addEventListener('touchend', function(e) {
-                if (isDragging) {
-                    isDragging = false;
-                    chatWidget.style.transition = '';
-
-                    if (!hasMoved) {
-                        toggleChat();
-                    }
-                }
-            });
-        });
+        // 사용 가이드
+        function showInfo() {
+            addMessage('Car Agent AI 사용 가이드:\n\n1. 💰 유지비 계산: "BMW 520d 2020년식 유지비 알려줘"\n2. 🎯 차량 추천: "3천만원으로 살 수 있는 차 추천해줘"\n3. 📊 중고차 시세: "아반떼 CN7 중고차 시세 알려줘"\n4. 🔧 정비 정보: "엔진오일 교체 주기 알려줘"\n\n자연스럽게 질문하시면 AI가 답변해드립니다!', 'bot');
+        }
     </script>
-
-    <!-- 채팅봇 위젯 - AI 전문가 테마 -->
-    <div class="chat-widget">
-        <button class="chat-toggle-btn">🤖</button>
-        <div class="chat-window" id="chatWindow" style="display: none;">
-            <div class="chat-header">
-                <h3>Car Agent AI</h3>
-                <span class="chat-header-status">온라인</span>
-                <button class="chat-close" onclick="toggleChat()">×</button>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-message bot">
-                    <div class="message-bubble">
-                        안녕하세요! 차량에 대해 궁금한 게 있으시면 물어보세요 💬
-                    </div>
-                </div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" class="chat-input" id="chatInput" placeholder="메시지를 입력하세요...">
-                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
