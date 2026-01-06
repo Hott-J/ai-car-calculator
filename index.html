@@ -642,7 +642,10 @@
                 removeTypingIndicator(typingId);
 
                 // 응답 처리: JSON 구조화 데이터 또는 일반 텍스트
-                if (data.reply) {
+                if (data.output) {
+                    // AI Agent 응답 (output 필드)
+                    addMessage(data.output, 'bot');
+                } else if (data.reply) {
                     // reply가 문자열인 경우
                     if (typeof data.reply === 'string') {
                         try {
@@ -678,10 +681,17 @@
                     // 유지비 계산 결과 (구조화된 JSON)
                     const formattedReply = formatMaintenanceData(data);
                     addMessage(formattedReply, 'bot');
-                } else if (Array.isArray(data) && data.length > 0 && data[0].calculated) {
+                } else if (Array.isArray(data) && data.length > 0) {
                     // 배열로 감싸진 경우 처리
-                    const formattedReply = formatMaintenanceData(data[0]);
-                    addMessage(formattedReply, 'bot');
+                    const firstItem = data[0];
+                    if (firstItem.calculated) {
+                        const formattedReply = formatMaintenanceData(firstItem);
+                        addMessage(formattedReply, 'bot');
+                    } else if (firstItem.output) {
+                        addMessage(firstItem.output, 'bot');
+                    } else {
+                        addMessage(JSON.stringify(data), 'bot');
+                    }
                 } else {
                     addMessage('응답을 받지 못했습니다. 콘솔을 확인하세요.', 'bot');
                 }
