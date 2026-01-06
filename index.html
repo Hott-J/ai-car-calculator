@@ -635,19 +635,36 @@
 
                 const data = await response.json();
 
+                // 디버깅용 로그
+                console.log('받은 데이터:', data);
+
                 // 타이핑 인디케이터 제거
                 removeTypingIndicator(typingId);
 
                 // 응답 처리: JSON 구조화 데이터 또는 일반 텍스트
                 if (data.reply) {
-                    // 일반 텍스트 응답
-                    addMessage(data.reply, 'bot');
+                    // reply가 문자열인 경우
+                    if (typeof data.reply === 'string') {
+                        addMessage(data.reply, 'bot');
+                    } else {
+                        // reply가 객체인 경우 (중첩된 경우)
+                        if (data.reply.calculated) {
+                            const formattedReply = formatMaintenanceData(data.reply);
+                            addMessage(formattedReply, 'bot');
+                        } else {
+                            addMessage(JSON.stringify(data.reply), 'bot');
+                        }
+                    }
                 } else if (data.calculated) {
                     // 유지비 계산 결과 (구조화된 JSON)
                     const formattedReply = formatMaintenanceData(data);
                     addMessage(formattedReply, 'bot');
+                } else if (Array.isArray(data) && data.length > 0 && data[0].calculated) {
+                    // 배열로 감싸진 경우 처리
+                    const formattedReply = formatMaintenanceData(data[0]);
+                    addMessage(formattedReply, 'bot');
                 } else {
-                    addMessage('응답을 받지 못했습니다.', 'bot');
+                    addMessage('응답을 받지 못했습니다. 콘솔을 확인하세요.', 'bot');
                 }
 
             } catch (error) {
