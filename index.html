@@ -149,10 +149,10 @@
         /* 퀵 액션 버튼들 */
         .quick-actions {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
             margin-top: 32px;
-            max-width: 800px;
+            max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -499,12 +499,11 @@
 <body>
     <!-- 헤더 -->
     <div class="header">
-        <div class="logo">
+        <div class="logo" onclick="resetToHome()" style="cursor: pointer;">
             <span class="logo-icon">🤖</span>
             <span>Car Agent AI</span>
         </div>
         <div class="nav-menu">
-            <button class="nav-btn" onclick="showInfo()">사용 가이드</button>
             <div class="status-indicator">
                 <span class="status-dot"></span>
                 온라인
@@ -524,7 +523,7 @@
                         차량에 관한 모든 것, AI에게 물어보세요
                     </div>
                     <div class="welcome-subtitle">
-                        유지비 계산부터 차량 추천, 중고차 시세, 정비 정보까지<br>
+                        유지비 계산과 중고차 가격 조회를<br>
                         자연스러운 대화로 빠르게 확인하세요
                     </div>
 
@@ -534,17 +533,9 @@
                             <span class="action-icon">💰</span>
                             유지비 계산하기
                         </button>
-                        <button class="action-btn" onclick="quickAction('추천')">
-                            <span class="action-icon">🎯</span>
-                            차량 추천받기
-                        </button>
-                        <button class="action-btn" onclick="quickAction('시세')">
+                        <button class="action-btn" onclick="quickAction('가격')">
                             <span class="action-icon">📊</span>
-                            중고차 시세 확인
-                        </button>
-                        <button class="action-btn" onclick="quickAction('정비')">
-                            <span class="action-icon">🔧</span>
-                            정비 정보 알아보기
+                            가격 조회하기
                         </button>
                     </div>
                 </div>
@@ -556,7 +547,7 @@
                     <textarea
                         class="chat-input"
                         id="chatInput"
-                        placeholder="예: BMW 520d 유지비 알려줘"
+                        placeholder="무엇을 도와드릴까요?"
                         rows="1"
                     ></textarea>
                 </div>
@@ -569,7 +560,7 @@
 
     <script>
         // 버전 확인 (캐시 디버깅용)
-        console.log('🚀 Car Agent v2.0 - 응답 파싱 개선 버전');
+        console.log('🚀 Car Agent v2.1 - UX 개선 버전 (로고 홈, 퀵액션 예시)');
         console.log('로드 시간:', new Date().toLocaleTimeString());
 
         // 세션 ID 생성
@@ -594,17 +585,56 @@
             }
         });
 
-        // 퀵 액션 버튼
-        function quickAction(type) {
-            const prompts = {
-                '유지비': '자동차 유지비를 계산하고 싶어요. 어떤 정보가 필요한가요?',
-                '추천': '예산과 용도에 맞는 차량을 추천받고 싶어요.',
-                '시세': '중고차 시세를 확인하고 싶어요.',
-                '정비': '차량 정비 정보를 알고 싶어요.'
-            };
+        // 홈 화면으로 리셋
+        function resetToHome() {
+            const chatMessages = document.getElementById('chatMessages');
+            const welcomeSection = document.getElementById('welcomeSection');
 
-            chatInput.value = prompts[type];
-            chatInput.focus();
+            // 모든 메시지 삭제하고 웰컴 섹션만 남기기
+            chatMessages.innerHTML = `
+                <div class="welcome-section" id="welcomeSection">
+                    <div class="welcome-title">
+                        <span>🚗</span>
+                        차량에 관한 모든 것, AI에게 물어보세요
+                    </div>
+                    <div class="welcome-subtitle">
+                        유지비 계산과 중고차 가격 조회를<br>
+                        자연스러운 대화로 빠르게 확인하세요
+                    </div>
+
+                    <!-- 퀵 액션 버튼 -->
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="quickAction('유지비')">
+                            <span class="action-icon">💰</span>
+                            유지비 계산하기
+                        </button>
+                        <button class="action-btn" onclick="quickAction('가격')">
+                            <span class="action-icon">📊</span>
+                            가격 조회하기
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // 입력창 초기화
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+        }
+
+        // 퀵 액션 버튼 - 예시 메시지를 봇이 먼저 보여주기
+        function quickAction(type) {
+            // 웰컴 섹션 숨기기
+            const welcomeSection = document.getElementById('welcomeSection');
+            if (welcomeSection) {
+                welcomeSection.style.display = 'none';
+            }
+
+            // 각 타입별 예시 메시지를 봇이 보여줌
+            if (type === '유지비') {
+                addMessage('💰 **유지비 계산 서비스**입니다.\n\n다음과 같이 질문해주세요:\n\n• "BMW 520d 2020년식 유지비 알려줘"\n• "아반떼 CN7 유지비 계산해줘"\n• "제네시스 G80 월 유지비 얼마야?"\n\n**차량명**과 **연식**을 알려주시면 정확한 계산이 가능합니다!', 'bot');
+            } else if (type === '가격') {
+                addMessage('📊 **중고차 가격 조회 서비스**입니다.\n\n다음과 같이 질문해주세요:\n\n• "벨로스터 2019년식 가격 알려줘"\n• "K5 2021년 중고차 시세는?"\n• "그랜저 2020년형 얼마야?"\n\n**차량명**과 **연식**을 알려주시면 최신 시세를 확인해드립니다!', 'bot');
+            }
         }
 
         // 메시지 전송
@@ -872,11 +902,6 @@
             if (typingElement) {
                 typingElement.remove();
             }
-        }
-
-        // 사용 가이드
-        function showInfo() {
-            addMessage('Car Agent AI 사용 가이드:\n\n1. 💰 유지비 계산: "BMW 520d 2020년식 유지비 알려줘"\n2. 🎯 차량 추천: "3천만원으로 살 수 있는 차 추천해줘"\n3. 📊 중고차 시세: "아반떼 CN7 중고차 시세 알려줘"\n4. 🔧 정비 정보: "엔진오일 교체 주기 알려줘"\n\n자연스럽게 질문하시면 AI가 답변해드립니다!', 'bot');
         }
     </script>
 </body>
