@@ -7,6 +7,9 @@
     <title>Car Agent AI - 자동차 전문 AI 어시스턴트</title>
 
     <meta name="description" content="Car Agent AI - 자동차에 관한 모든 것을 물어보세요. 유지비 계산, 차량 추천, 중고차 시세, 정비 정보까지 AI가 답변해드립니다.">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <style>
         * {
@@ -565,6 +568,10 @@
     </div>
 
     <script>
+        // 버전 확인 (캐시 디버깅용)
+        console.log('🚀 Car Agent v2.0 - 응답 파싱 개선 버전');
+        console.log('로드 시간:', new Date().toLocaleTimeString());
+
         // 세션 ID 생성
         let sessionId = localStorage.getItem('car_agent_session');
         if (!sessionId) {
