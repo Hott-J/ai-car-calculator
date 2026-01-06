@@ -224,6 +224,104 @@
             border-radius: 16px 16px 16px 4px;
         }
 
+        /* 메시지 내 마크다운 스타일링 */
+        .message-bubble h1,
+        .message-bubble h2,
+        .message-bubble h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .message-bubble h1 {
+            font-size: 20px;
+            border-bottom: 2px solid var(--border-blue);
+            padding-bottom: 8px;
+        }
+
+        .message-bubble h2 {
+            font-size: 18px;
+        }
+
+        .message-bubble h3 {
+            font-size: 16px;
+        }
+
+        .message-bubble h1:first-child,
+        .message-bubble h2:first-child,
+        .message-bubble h3:first-child {
+            margin-top: 0;
+        }
+
+        .message-bubble strong {
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .message-bubble ul,
+        .message-bubble ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+
+        .message-bubble li {
+            margin: 6px 0;
+            line-height: 1.7;
+        }
+
+        .message-bubble p {
+            margin: 8px 0;
+            line-height: 1.7;
+        }
+
+        .message-bubble code {
+            background: rgba(30, 58, 138, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--primary-blue);
+        }
+
+        .message-bubble pre {
+            background: rgba(30, 58, 138, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border-left: 3px solid var(--primary-blue-light);
+        }
+
+        .message-bubble pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .message-bubble blockquote {
+            border-left: 4px solid var(--primary-blue-light);
+            padding-left: 16px;
+            margin: 12px 0;
+            color: var(--text-gray);
+            font-style: italic;
+        }
+
+        .message-bubble hr {
+            border: none;
+            border-top: 1px solid var(--border-blue);
+            margin: 16px 0;
+        }
+
+        .message-bubble a {
+            color: var(--primary-blue-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .message-bubble a:hover {
+            text-decoration: underline;
+        }
+
         /* 타이핑 인디케이터 */
         .typing-indicator {
             display: inline-flex;
@@ -550,20 +648,72 @@
             }
         }
 
+        // 간단한 마크다운 파서
+        function parseMarkdown(text) {
+            // 줄바꿈을 보존하면서 처리
+            let html = text;
+
+            // 코드 블록 (```)
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+
+            // 인라인 코드 (`)
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // 볼드 (**)
+            html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+
+            // 헤딩 처리
+            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+            // 리스트 처리 (순서 없는 리스트)
+            html = html.replace(/^\* (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+            // 리스트 처리 (순서 있는 리스트)
+            html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+
+            // 링크 [text](url)
+            html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+            // 구분선
+            html = html.replace(/^---$/gm, '<hr>');
+
+            // 줄바꿈 처리
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+
+            // 빈 p 태그 제거
+            html = html.replace(/<p><\/p>/g, '');
+            html = html.replace(/<p>(<h[123]>)/g, '$1');
+            html = html.replace(/(<\/h[123]>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<ul>)/g, '$1');
+            html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<pre>)/g, '$1');
+            html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+
+            return html;
+        }
+
         // 메시지 추가
         function addMessage(text, sender) {
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
 
+            // 봇 메시지는 마크다운 파싱
+            const content = sender === 'bot' ? parseMarkdown(text) : text;
+
             if (sender === 'bot') {
                 messageDiv.innerHTML = `
                     <div class="bot-avatar">🤖</div>
-                    <div class="message-bubble">${text}</div>
+                    <div class="message-bubble">${content}</div>
                 `;
             } else {
                 messageDiv.innerHTML = `
-                    <div class="message-bubble">${text}</div>
+                    <div class="message-bubble">${content}</div>
                 `;
             }
 
