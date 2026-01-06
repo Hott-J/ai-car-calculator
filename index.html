@@ -645,9 +645,28 @@
                 if (data.reply) {
                     // reply가 문자열인 경우
                     if (typeof data.reply === 'string') {
-                        addMessage(data.reply, 'bot');
+                        try {
+                            // JSON 문자열인지 확인 ('{' 로 시작하면 JSON)
+                            if (data.reply.trim().startsWith('{')) {
+                                const parsedData = JSON.parse(data.reply);
+                                if (parsedData.calculated) {
+                                    // 유지비 계산 결과
+                                    const formattedReply = formatMaintenanceData(parsedData);
+                                    addMessage(formattedReply, 'bot');
+                                } else {
+                                    // 다른 구조화된 데이터
+                                    addMessage(data.reply, 'bot');
+                                }
+                            } else {
+                                // 일반 마크다운 텍스트
+                                addMessage(data.reply, 'bot');
+                            }
+                        } catch (e) {
+                            // JSON 파싱 실패 시 그냥 텍스트로 표시
+                            addMessage(data.reply, 'bot');
+                        }
                     } else {
-                        // reply가 객체인 경우 (중첩된 경우)
+                        // reply가 객체인 경우
                         if (data.reply.calculated) {
                             const formattedReply = formatMaintenanceData(data.reply);
                             addMessage(formattedReply, 'bot');
