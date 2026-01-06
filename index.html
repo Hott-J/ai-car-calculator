@@ -621,7 +621,7 @@
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
 
-        /* 채팅봇 UI */
+        /* 채팅봇 UI - F1 테디베어 테마 */
         .chat-widget {
             position: fixed;
             bottom: 24px;
@@ -630,63 +630,114 @@
         }
 
         .chat-toggle-btn {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+            background: linear-gradient(135deg, #DC0000 0%, #8B0000 100%);
+            border: 3px solid #FFD700;
             color: white;
-            font-size: 28px;
+            font-size: 38px;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 25px rgba(220, 0, 0, 0.5), 0 0 0 4px rgba(255, 215, 0, 0.2);
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
 
         .chat-toggle-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 8px 35px rgba(220, 0, 0, 0.7), 0 0 0 6px rgba(255, 215, 0, 0.3);
+            animation: none;
+        }
+
+        .chat-toggle-btn::after {
+            content: '🏁';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 20px;
+            animation: wave 1.5s infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-20deg); }
         }
 
         .chat-window {
             position: absolute;
-            bottom: 80px;
+            bottom: 90px;
             right: 0;
-            width: 380px;
-            height: 500px;
+            width: 400px;
+            height: 550px;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 24px;
+            box-shadow: 0 12px 50px rgba(220, 0, 0, 0.25), 0 0 0 3px rgba(255, 215, 0, 0.3);
             display: none;
             flex-direction: column;
             overflow: hidden;
+            border: 3px solid #FFD700;
         }
 
         .chat-window.open {
             display: flex;
-            animation: slideUp 0.3s ease-out;
+            animation: slideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #DC0000 0%, #8B0000 100%);
             color: white;
-            padding: 16px 20px;
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(220, 0, 0, 0.3);
+        }
+
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
         }
 
         .chat-header h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-header h3::before {
+            content: '🧸';
+            font-size: 24px;
+            animation: rotate 3s infinite linear;
+        }
+
+        @keyframes rotate {
+            0%, 90%, 100% { transform: rotate(0deg); }
+            92%, 98% { transform: rotate(-15deg); }
+            94%, 96% { transform: rotate(15deg); }
         }
 
         .chat-close {
@@ -743,10 +794,37 @@
             color: white;
         }
 
+        .chat-message.bot {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .chat-message.bot::before {
+            content: '🧸';
+            font-size: 28px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
         .chat-message.bot .message-bubble {
-            background: white;
+            background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
             color: #2d3748;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 12px rgba(220, 0, 0, 0.15);
+            border: 2px solid #FFE4E4;
+            position: relative;
+        }
+
+        .chat-message.bot .message-bubble::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 12px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 8px 8px 0;
+            border-color: transparent #FFE4E4 transparent transparent;
         }
 
         .chat-input-area {
@@ -760,75 +838,105 @@
         .chat-input {
             flex: 1;
             padding: 10px 14px;
-            border: 1.5px solid #e2e8f0;
+            border: 2px solid #FFE4E4;
             border-radius: 20px;
             font-size: 14px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.3s;
         }
 
         .chat-input:focus {
-            border-color: #667eea;
+            border-color: #DC0000;
+            box-shadow: 0 0 0 3px rgba(220, 0, 0, 0.1);
         }
 
         .chat-send-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+            background: linear-gradient(135deg, #DC0000 0%, #8B0000 100%);
+            border: 2px solid #FFD700;
             color: white;
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            box-shadow: 0 3px 10px rgba(220, 0, 0, 0.3);
         }
 
         .chat-send-btn:hover {
-            transform: scale(1.1);
+            transform: scale(1.15) rotate(-10deg);
+            box-shadow: 0 5px 15px rgba(220, 0, 0, 0.5);
         }
 
         .chat-send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
         .typing-indicator {
             display: inline-flex;
-            gap: 4px;
-            padding: 10px 14px;
+            gap: 6px;
+            padding: 12px 16px;
+            align-items: center;
         }
 
-        .typing-dot {
-            width: 8px;
-            height: 8px;
+        .typing-indicator::before {
+            content: '🧸';
+            font-size: 20px;
+            margin-right: 6px;
+        }
+
+        .typing-indicator span {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #cbd5e0;
+            background: linear-gradient(135deg, #DC0000 0%, #8B0000 100%);
             animation: typing 1.4s infinite;
+            box-shadow: 0 2px 4px rgba(220, 0, 0, 0.3);
         }
 
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+            30% { transform: translateY(-12px); opacity: 1; }
         }
 
         @media (max-width: 600px) {
             .chat-window {
-                width: calc(100vw - 32px);
-                height: 70vh;
-                bottom: 70px;
-                right: 16px;
-                left: 16px;
+                width: calc(100vw - 24px);
+                height: 75vh;
+                bottom: 80px;
+                right: 12px;
+                left: 12px;
             }
 
             .chat-widget {
                 right: 16px;
                 bottom: 16px;
+            }
+
+            .chat-toggle-btn {
+                width: 64px;
+                height: 64px;
+                font-size: 34px;
+            }
+
+            .chat-toggle-btn::after {
+                font-size: 18px;
+            }
+
+            .chat-header h3 {
+                font-size: 16px;
+            }
+
+            .chat-message.bot::before {
+                font-size: 24px;
             }
         }
 
@@ -1376,24 +1484,24 @@
         });
     </script>
 
-    <!-- 채팅봇 위젯 -->
+    <!-- 채팅봇 위젯 - F1 테디베어 테마 -->
     <div class="chat-widget">
-        <button class="chat-toggle-btn" onclick="toggleChat()">💬</button>
+        <button class="chat-toggle-btn" onclick="toggleChat()">🧸</button>
         <div class="chat-window" id="chatWindow" style="display: none;">
             <div class="chat-header">
-                <h3>🤖 Car Agent</h3>
+                <h3>Car Agent 🏎️</h3>
                 <button class="chat-close" onclick="toggleChat()">×</button>
             </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="chat-message bot">
                     <div class="message-bubble">
-                        안녕하세요! 자동차에 관해 궁금한 것이 있으신가요?
+                        안녕하세요! 🏁 차량에 대해 궁금한 게 있으신가요?
                     </div>
                 </div>
             </div>
             <div class="chat-input-area">
-                <input type="text" class="chat-input" id="chatInput" placeholder="메시지를 입력하세요...">
-                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                <input type="text" class="chat-input" id="chatInput" placeholder="궁금한 걸 물어보세요! 🚗">
+                <button class="chat-send-btn" onclick="sendMessage()">🏁</button>
             </div>
         </div>
     </div>
