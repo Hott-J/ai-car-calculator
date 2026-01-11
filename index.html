@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>운명적 자동차 테스트 | 성향 분석</title>
     <meta name="description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요.">
+    <meta property="og:title" content="운명적 자동차 테스트">
+    <meta property="og:description" content="나의 성향을 분석해 가장 잘 어울리는 자동차를 추천해드립니다.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop">
     
     <!-- Chosen Palette: Toss Blue Theme -->
     
@@ -60,6 +63,32 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Toast Message Style */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: rgba(51, 51, 51, 0.9);
+            color: #fff;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 15px;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen flex justify-center items-start pt-0 md:pt-10 pb-10">
@@ -94,9 +123,9 @@
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
                         테스트 시작하기
                     </button>
-                    <!-- Real-time Participant Count -->
+                    <!-- Simulated Global Count -->
                     <p class="text-xs text-gray-400">
-                        현재 <span id="participant-count" class="font-bold text-[#3182F6]">0</span>명이 참여했어요
+                        현재 <span id="participant-count" class="font-bold text-[#3182F6]">1,204</span>명이 참여했어요
                     </p>
                 </div>
             </section>
@@ -180,105 +209,38 @@
                 </div>
             </section>
         </div>
+        
+        <!-- Toast Message Element -->
+        <div id="toast">링크가 복사되었습니다!</div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, increment, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Safe Config Loader ---
-        let db = null;
-        let auth = null;
-        let appId = 'default-app-id';
-        let isFirebaseAvailable = false;
-
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                if (typeof __app_id !== 'undefined') appId = __app_id;
-                isFirebaseAvailable = true;
-            } else {
-                console.log("Offline Mode.");
-            }
-        } catch (e) {
-            console.warn("Firebase Init Skipped:", e);
-        }
-
-        const COLLECTION_NAME = 'stats';
-        const DOC_ID = 'global_counts';
-
-        // 1. Initialize DB Logic (Safe Mode)
-        async function initFirebase() {
-            if (!isFirebaseAvailable) {
-                let count = localStorage.getItem('mock_participant_count') || 0;
-                updateParticipantCount(parseInt(count));
-                return;
-            }
-
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                if (!auth.currentUser) return;
-
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
-
-                onSnapshot(docRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.data();
-                        updateParticipantCount(data.participants || 0);
-                    } else {
-                        setDoc(docRef, { participants: 0 });
-                        updateParticipantCount(0);
-                    }
-                }, (error) => {
-                    console.log("DB permission error, using local fallback");
-                    updateParticipantCount(0);
-                });
-
-            } catch (e) {
-                console.log("Auth/DB Error, using offline mode", e);
-                updateParticipantCount(0);
+    <script>
+        // --- 1. Fake "Global" Participant Count Logic ---
+        // DB 없이도 '시간'을 기준으로 숫자를 계산하여 모두에게 비슷한 숫자를 보여줍니다.
+        function updateSimulatedCount() {
+            // 기준 시간: 2025년 1월 1일
+            const startDate = new Date('2025-01-01T00:00:00').getTime();
+            const now = new Date().getTime();
+            
+            // 경과 시간(초) / 30초마다 1명씩 증가한다고 가정 (숫자 조절 가능)
+            // 기본값 1200명 + 시간 경과 증가분
+            const baseCount = 1204;
+            const increaseFactor = Math.floor((now - startDate) / 30000); // 30초마다 1 증가
+            
+            const totalCount = baseCount + increaseFactor;
+            
+            const countEl = document.getElementById('participant-count');
+            if (countEl) {
+                countEl.innerText = totalCount.toLocaleString();
             }
         }
+        
+        // 페이지 로드 시 및 10초마다 카운트 업데이트
+        updateSimulatedCount();
+        setInterval(updateSimulatedCount, 10000);
 
-        function updateParticipantCount(num) {
-            const el = document.getElementById('participant-count');
-            if(el) {
-                el.innerText = num.toLocaleString();
-                el.classList.remove('text-[#3182F6]');
-                el.classList.add('text-green-500');
-                setTimeout(() => {
-                    el.classList.remove('text-green-500');
-                    el.classList.add('text-[#3182F6]');
-                }, 300);
-            }
-        }
 
-        async function incrementParticipants() {
-            if (isFirebaseAvailable && auth && auth.currentUser) {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
-                try {
-                    await updateDoc(docRef, { participants: increment(1) });
-                } catch (e) {
-                    // Ignore
-                }
-            } else {
-                let current = parseInt(localStorage.getItem('mock_participant_count') || '0');
-                current++;
-                localStorage.setItem('mock_participant_count', current);
-                updateParticipantCount(current);
-            }
-        }
-
-        // 2. Data
+        // --- 2. Data Definition ---
         const questions = [
             {
                 id: 1,
@@ -382,7 +344,6 @@
             }
         ];
 
-        // Added ID for URL sharing
         const carResults = [
             {
                 id: "porsche911",
@@ -476,9 +437,9 @@
 
         let currentQuestion = 0;
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
-        let finalResultId = null; // Store current result ID
+        let finalResultId = null; 
 
-        // --- Core Functions ---
+        // --- 3. Interaction Functions ---
 
         function startQuiz() {
             document.getElementById('intro-view').classList.add('hidden');
@@ -486,12 +447,11 @@
             quizView.classList.remove('hidden');
             quizView.classList.add('flex');
             
-            incrementParticipants();
             renderQuestion();
         }
 
         function restartQuiz() {
-            // Remove Query Params from URL without reload
+            // URL 파라미터 제거 후 리로드 (깔끔하게 초기화)
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.pushState({path:newUrl},'',newUrl);
             location.reload();
@@ -530,6 +490,7 @@
                 if (scores[key] !== undefined) scores[key] += points[key];
             }
             currentQuestion++;
+            // 약간의 딜레이로 자연스럽게 전환
             setTimeout(renderQuestion, 150);
         }
 
@@ -584,7 +545,7 @@
         }
 
         function renderResultData(carData) {
-            finalResultId = carData.id; // Save for sharing
+            finalResultId = carData.id; 
 
             document.getElementById('result-name').innerText = carData.name;
             document.getElementById('result-icon').innerText = carData.icon;
@@ -605,7 +566,6 @@
 
         function renderChart(statsData) {
             const canvas = document.getElementById('radarChart');
-            // Destroy existing chart if any
             let chartStatus = Chart.getChart("radarChart"); 
             if (chartStatus != undefined) {
                 chartStatus.destroy();
@@ -650,27 +610,68 @@
             });
         }
 
+        // --- 4. Enhanced Share Function (Web & Mobile Compatible) ---
         function shareResult() {
-            // Generate Share URL with Result ID
             const baseUrl = window.location.href.split('?')[0];
             const shareUrl = `${baseUrl}?result=${finalResultId}`;
 
+            // 1. 모바일 공유하기 (navigator.share) 시도
             if (navigator.share) {
                 navigator.share({
                     title: '운명적 자동차 테스트',
                     text: `나에게 딱 맞는 차는 ${document.getElementById('result-name').innerText}입니다!`,
                     url: shareUrl,
+                }).catch((error) => {
+                    // 사용자가 공유 취소하거나 에러가 나면 클립보드 복사로 fallback
+                    console.log('Share failed or canceled', error);
+                    copyToClipboard(shareUrl);
                 });
             } else {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert('결과 링크가 복사되었습니다!');
-                }).catch(() => {
-                    alert('링크 복사에 실패했습니다.');
-                });
+                // 2. PC 등 지원 안하면 바로 클립보드 복사
+                copyToClipboard(shareUrl);
             }
         }
 
-        // --- Init: Check URL Params for Shared Result ---
+        function copyToClipboard(text) {
+            // navigator.clipboard API 사용 (최신 브라우저)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast();
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                // 구형 방식 Fallback
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";  // 화면 밖으로 안 나가게
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                alert('링크 복사에 실패했습니다. URL을 직접 복사해주세요.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+
+        // --- 5. Init Logic ---
         function checkUrlForSharedResult() {
             const urlParams = new URLSearchParams(window.location.search);
             const resultId = urlParams.get('result');
@@ -678,11 +679,9 @@
             if (resultId) {
                 const sharedCar = carResults.find(c => c.id === resultId);
                 if (sharedCar) {
-                    // Hide Intro, Show Result Immediately
                     document.getElementById('intro-view').classList.add('hidden');
                     document.getElementById('result-view').classList.remove('hidden');
                     
-                    // Change "Restart" button text to "Test Myself"
                     const restartBtn = document.getElementById('restart-btn');
                     restartBtn.innerText = "나도 테스트하기";
                     
@@ -691,9 +690,8 @@
             }
         }
 
-        // --- Event Listeners ---
-        initFirebase();
-        checkUrlForSharedResult(); // Run on load
+        // 실행
+        checkUrlForSharedResult();
 
         const startBtn = document.getElementById('start-btn');
         if (startBtn) startBtn.addEventListener('click', startQuiz);
