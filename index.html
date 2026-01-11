@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>운명적 자동차 테스트 | AI 성향 분석</title>
     
-    <!-- Chosen Palette: Toss Blue Theme (Minimalist White/Gray/Blue) -->
-    <!-- Primary: #3182F6 (Blue), Background: #F2F4F6 (Light Gray), Surface: #FFFFFF -->
+    <!-- Chosen Palette: Toss Blue Theme -->
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -53,7 +52,6 @@
             height: 300px;
         }
         
-        /* Custom Scrollbar hide */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -65,26 +63,12 @@
 </head>
 <body class="antialiased min-h-screen flex justify-center items-start pt-0 md:pt-10 pb-10">
 
-    <!-- Application Structure Plan: 
-         1. Intro View: Catchy title, simplistic design to invite user (Toss style).
-         2. Quiz View: Linear progression (1 of 10), card-based layout, instant feedback interactions.
-         3. Loading View: "Fake" analysis steps (Checking SNS habits, Driving style...) to build anticipation.
-         4. Result View: 
-            - Top: Matched Car Name & "Unicode" Icon/Emoji visualization.
-            - Middle: Radar Chart (Chart.js) showing personality traits (Speed, Swag, Comfort, Practicality, Tech).
-            - Bottom: Detailed text description, tags, and "Best Friend/Worst Enemy" car matches.
-         Why this structure? It mimics popular viral personality tests (MBTI style) which have high engagement. 
-         The dashboard-like result page allows users to "explore" their own data.
-    -->
-
     <main id="app" class="w-full max-w-[480px] bg-white md:rounded-[32px] shadow-xl min-h-screen md:min-h-[800px] overflow-hidden relative flex flex-col">
         
-        <!-- Header / Nav -->
         <nav class="h-14 flex items-center justify-center border-b border-gray-100 px-5 sticky top-0 bg-white/90 backdrop-blur-md z-10">
             <span class="text-lg font-bold text-gray-800">🏎️ CAR MBTI</span>
         </nav>
 
-        <!-- Container for Views -->
         <div id="content-area" class="flex-1 relative overflow-y-auto no-scrollbar">
             
             <!-- VIEW 1: INTRO -->
@@ -106,10 +90,14 @@
                 </div>
 
                 <div class="w-full space-y-3 slide-up" style="animation-delay: 0.2s;">
-                    <button onclick="startQuiz()" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
+                    <!-- Removed onclick from HTML to prevent errors -->
+                    <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
                         테스트 시작하기
                     </button>
-                    <p class="text-xs text-gray-400">참여자수: 1,240,932명</p>
+                    <!-- Real-time Participant Count -->
+                    <p class="text-xs text-gray-400">
+                        현재 <span id="participant-count" class="font-bold text-[#3182F6]">0</span>명이 참여했어요
+                    </p>
                 </div>
             </section>
 
@@ -123,7 +111,7 @@
                     <div class="space-y-2">
                         <span id="q-number" class="text-[#3182F6] font-bold text-xl">Q1.</span>
                         <h2 id="q-text" class="text-2xl font-bold text-gray-900 leading-snug break-keep">
-                            질문 텍스트가 여기에 들어갑니다.
+                            질문 텍스트...
                         </h2>
                     </div>
 
@@ -142,7 +130,6 @@
 
             <!-- VIEW 4: RESULT -->
             <section id="result-view" class="hidden bg-[#F2F4F6]">
-                <!-- Top Card -->
                 <div class="bg-white p-8 rounded-b-[32px] shadow-sm flex flex-col items-center text-center space-y-4 slide-up">
                     <span class="text-gray-500 font-medium">나의 영혼의 파트너</span>
                     <h2 id="result-name" class="text-3xl font-extrabold text-gray-900 break-keep"></h2>
@@ -151,50 +138,37 @@
                         <!-- Emoji Icon -->
                     </div>
 
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <span id="tag-1" class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 font-medium">#태그1</span>
-                        <span id="tag-2" class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 font-medium">#태그2</span>
-                        <span id="tag-3" class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 font-medium">#태그3</span>
+                    <div class="flex flex-wrap gap-2 justify-center" id="result-tags">
+                        <!-- Tags injected -->
                     </div>
                 </div>
 
-                <!-- Analysis Content -->
                 <div class="p-6 space-y-6">
-                    <!-- Intro Paragraph -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.1s;">
                         <h3 class="text-lg font-bold text-gray-800 mb-2">어떤 운전자냐면요</h3>
                         <p id="result-desc" class="text-gray-600 leading-relaxed text-sm break-keep">
-                            설명 텍스트...
+                            설명...
                         </p>
                     </div>
 
-                    <!-- Radar Chart -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.2s;">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">성향 분석 그래프</h3>
-                        <!-- Visualization & Content Choices: 
-                             Goal: Compare personality traits. 
-                             Method: Radar Chart (Chart.js). 
-                             Justification: Radar charts are excellent for showing multi-variable "profiles" like RPG stats, making it easy to see if a user is "Speed-focused" or "Comfort-focused". 
-                             Interaction: Tooltip on hover.
-                        -->
                         <div class="chart-container">
                             <canvas id="radarChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Recommended Habits -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.3s;">
                         <h3 class="text-lg font-bold text-gray-800 mb-3">드라이빙 플레이리스트 추천</h3>
                         <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
                             <div class="w-12 h-12 bg-[#E8F3FF] rounded-full flex items-center justify-center text-xl">🎵</div>
                             <div>
-                                <p id="music-rec" class="font-bold text-gray-900">Chill Hop Essentials</p>
+                                <p id="music-rec" class="font-bold text-gray-900">Music Title</p>
                                 <p class="text-xs text-gray-500">안전운전을 위한 선곡</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div class="grid grid-cols-2 gap-3 pb-8 slide-up" style="animation-delay: 0.4s;">
                         <button onclick="shareResult()" class="btn-press bg-[#3182F6] text-white py-4 rounded-xl font-bold">
                             결과 공유하기
@@ -205,16 +179,85 @@
                     </div>
                 </div>
             </section>
-
         </div>
     </main>
 
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-    
-    <script>
-        // Data & Logic Store
-        // 5 Traits: Speed (S), Luxury/Swag (L), Practicality (P), Eco/Tech (E), Adventure (A)
-        
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, increment, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Consts
+        const COLLECTION_NAME = 'stats';
+        const DOC_ID = 'global_counts';
+
+        // 1. Initialize DB & Auth
+        async function initFirebase() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                if (!auth.currentUser) return;
+
+                // Path: /artifacts/{appId}/public/data/stats/global_counts
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
+
+                // Listen to real-time updates
+                onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        updateParticipantCount(data.participants || 0);
+                    } else {
+                        // Create with 0 if not exists
+                        setDoc(docRef, { participants: 0 });
+                        updateParticipantCount(0);
+                    }
+                }, (error) => {
+                    console.error("DB Error:", error);
+                    updateParticipantCount(0);
+                });
+
+            } catch (e) {
+                console.error("Auth Error:", e);
+                updateParticipantCount(0);
+            }
+        }
+
+        function updateParticipantCount(num) {
+            const el = document.getElementById('participant-count');
+            if(el) {
+                el.innerText = num.toLocaleString();
+                el.classList.remove('text-[#3182F6]');
+                el.classList.add('text-green-500');
+                setTimeout(() => {
+                    el.classList.remove('text-green-500');
+                    el.classList.add('text-[#3182F6]');
+                }, 300);
+            }
+        }
+
+        async function incrementParticipants() {
+            if (!auth.currentUser) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
+            try {
+                await updateDoc(docRef, { participants: increment(1) });
+            } catch (e) {
+                console.log("Count update failed (expected if first run/network)", e);
+            }
+        }
+
+        initFirebase();
+
+        // 2. Quiz Logic (Moved inside module to ensure cleaner scope)
         const questions = [
             {
                 id: 1,
@@ -318,17 +361,16 @@
             }
         ];
 
-        // Car Results Database
         const carResults = [
             {
                 name: "포르쉐 911",
-                type: "S", // Dominant Trait
+                type: "S",
                 secondary: "L",
                 icon: "🏎️",
                 desc: "당신은 멈추지 않는 심장을 가진 '열정의 레이서'입니다. 남들의 시선보다는 내가 느끼는 즐거움이 가장 중요하죠. 일상에서도 스릴을 즐기며, 목표를 향해 직진하는 당신에게는 영원한 드림카, 포르쉐 911이 딱입니다.",
                 tags: ["#스피드광", "#자기관리", "#성공의아이콘"],
                 music: "The Weeknd - Blinding Lights",
-                stats: [90, 80, 40, 30, 60] // S, L, P, E, A
+                stats: [90, 80, 40, 30, 60]
             },
             {
                 name: "제네시스 G90",
@@ -372,7 +414,7 @@
             },
             {
                 name: "포르쉐 타이칸",
-                type: "L", // Fallback for mix of L & E
+                type: "L",
                 secondary: "E",
                 icon: "⚡",
                 desc: "당신은 트렌드와 스타일을 놓치지 않는 '강남의 힙스터'입니다. 친환경도 중요하지만, 간지가 안 나는 건 용서할 수 없죠. 미래지향적인 기술과 압도적인 브랜드 파워를 모두 가진 타이칸이 당신의 페르소나입니다.",
@@ -402,25 +444,19 @@
             }
         ];
 
-        // State
         let currentQuestion = 0;
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
 
-        // DOM Elements
-        const introView = document.getElementById('intro-view');
-        const quizView = document.getElementById('quiz-view');
-        const loadingView = document.getElementById('loading-view');
-        const resultView = document.getElementById('result-view');
-        const progressBar = document.getElementById('progress-bar');
-        const qNumber = document.getElementById('q-number');
-        const qText = document.getElementById('q-text');
-        const optionsContainer = document.getElementById('options-container');
-
         // Functions
         function startQuiz() {
-            introView.classList.add('hidden');
+            // UI Transition first (Immediate response)
+            document.getElementById('intro-view').classList.add('hidden');
+            const quizView = document.getElementById('quiz-view');
             quizView.classList.remove('hidden');
             quizView.classList.add('flex');
+            
+            // Logic
+            incrementParticipants();
             renderQuestion();
         }
 
@@ -431,38 +467,42 @@
             }
 
             const q = questions[currentQuestion];
+            const qNumber = document.getElementById('q-number');
+            const qText = document.getElementById('q-text');
+            const progressBar = document.getElementById('progress-bar');
+            const optionsContainer = document.getElementById('options-container');
+
             qNumber.innerText = `Q${q.id}.`;
             qText.innerText = q.text;
             
-            // Update Progress
             const progress = ((currentQuestion + 1) / questions.length) * 100;
             progressBar.style.width = `${progress}%`;
 
-            // Render Options
             optionsContainer.innerHTML = '';
             q.options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = "btn-press w-full p-4 text-left bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded-xl transition-all duration-200 text-gray-700 font-medium text-lg";
                 btn.innerText = opt.text;
+                // Directly call internal function
                 btn.onclick = () => handleAnswer(opt.scores);
                 optionsContainer.appendChild(btn);
             });
         }
 
         function handleAnswer(points) {
-            // Add scores
             for (const key in points) {
                 if (scores[key] !== undefined) {
                     scores[key] += points[key];
                 }
             }
-            
             currentQuestion++;
-            // Small delay for UX
             setTimeout(renderQuestion, 150);
         }
 
         function showLoading() {
+            const quizView = document.getElementById('quiz-view');
+            const loadingView = document.getElementById('loading-view');
+            
             quizView.classList.add('hidden');
             loadingView.classList.remove('hidden');
             loadingView.classList.add('flex');
@@ -489,14 +529,11 @@
         }
 
         function calculateAndShowResult() {
-            loadingView.classList.add('hidden');
-            resultView.classList.remove('hidden');
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
             
-            // Logic to find best match
-            // 1. Find max score category
             let maxTrait = 'P';
             let maxScore = -1;
-            
             for (const [trait, score] of Object.entries(scores)) {
                 if (score > maxScore) {
                     maxScore = score;
@@ -504,42 +541,21 @@
                 }
             }
 
-            // 2. Filter cars by dominant trait
             let candidates = carResults.filter(c => c.type === maxTrait);
             
-            // 3. Tie breaker with secondary trait if multiple candidates
-            // Calculate secondary trait max score
-            let secondaryMaxScore = -1;
-            let secondaryTrait = '';
-            
             const sortedTraits = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-            // sortedTraits[0] is dominant, sortedTraits[1] is secondary
-            if (sortedTraits.length > 1) {
-                secondaryTrait = sortedTraits[1][0];
-            }
+            let secondaryTrait = sortedTraits.length > 1 ? sortedTraits[1][0] : '';
 
-            let finalCar = candidates[0];
-            
-            // Try to find exact match for primary + secondary
-            const perfectMatch = candidates.find(c => c.secondary === secondaryTrait);
-            if (perfectMatch) {
-                finalCar = perfectMatch;
-            } else if (candidates.length > 1) {
-                // If no secondary match, just pick first or random
-                finalCar = candidates[0];
-            }
-
-            // Fallback if logic fails (shouldn't happen with full coverage)
+            let finalCar = candidates.find(c => c.secondary === secondaryTrait) || candidates[0];
             if (!finalCar) finalCar = carResults[0];
 
-            // Render Result
             document.getElementById('result-name').innerText = finalCar.name;
             document.getElementById('result-icon').innerText = finalCar.icon;
             document.getElementById('result-desc').innerText = finalCar.desc;
             document.getElementById('music-rec').innerText = finalCar.music;
             
-            const tagsContainer = document.getElementById('result-view').querySelector('.flex-wrap');
-            tagsContainer.innerHTML = ''; // Clear placeholders
+            const tagsContainer = document.getElementById('result-tags');
+            tagsContainer.innerHTML = '';
             finalCar.tags.forEach(tag => {
                 const span = document.createElement('span');
                 span.className = "px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 font-medium";
@@ -552,12 +568,6 @@
 
         function renderChart(statsData) {
             const ctx = document.getElementById('radarChart').getContext('2d');
-            
-            // Normalize user scores to 0-100 for comparison? 
-            // Actually, we use the car's preset stats for the visual "Profile" 
-            // because user raw scores might be unbalanced. 
-            // The prompt asks to predict style, so showing the *Car's* profile fits the "Recommendation" vibe.
-            
             new Chart(ctx, {
                 type: 'radar',
                 data: {
@@ -577,35 +587,26 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    elements: {
-                        line: { borderWidth: 3 }
-                    },
+                    elements: { line: { borderWidth: 3 } },
                     scales: {
                         r: {
                             angleLines: { display: true, color: '#E5E7EB' },
                             grid: { color: '#E5E7EB' },
                             pointLabels: {
-                                font: {
-                                    size: 12,
-                                    family: "'Pretendard', sans-serif",
-                                    weight: 'bold'
-                                },
+                                font: { size: 12, family: "'Pretendard', sans-serif", weight: 'bold' },
                                 color: '#4B5563'
                             },
                             suggestedMin: 0,
                             suggestedMax: 100,
-                            ticks: { display: false } // Hide numbers on axis
+                            ticks: { display: false }
                         }
                     },
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        function shareResult() {
-            // Fake share action
+        window.shareResult = function() {
             if (navigator.share) {
                 navigator.share({
                     title: '운명적 자동차 테스트',
@@ -613,10 +614,16 @@
                     url: window.location.href,
                 });
             } else {
-                alert('결과가 클립보드에 복사되었습니다! (URL)');
-                // In a real app, logic to copy to clipboard
+                alert('결과가 복사되었습니다!');
             }
         }
+
+        // Attach Event Listeners
+        const startBtn = document.getElementById('start-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', startQuiz);
+        }
+
     </script>
 </body>
 </html>
