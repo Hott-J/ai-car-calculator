@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>운명적 자동차 테스트 | AI 성향 분석</title>
+    <title>운명적 자동차 테스트 | 성향 분석</title>
+    <meta name="description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요.">
     
     <!-- Chosen Palette: Toss Blue Theme -->
     
@@ -66,7 +67,7 @@
     <main id="app" class="w-full max-w-[480px] bg-white md:rounded-[32px] shadow-xl min-h-screen md:min-h-[800px] overflow-hidden relative flex flex-col">
         
         <nav class="h-14 flex items-center justify-center border-b border-gray-100 px-5 sticky top-0 bg-white/90 backdrop-blur-md z-10">
-            <span class="text-lg font-bold text-gray-800">🏎️ CAR MBTI</span>
+            <span class="text-lg font-bold text-gray-800 cursor-pointer" onclick="location.href=location.pathname">🏎️ CAR MBTI</span>
         </nav>
 
         <div id="content-area" class="flex-1 relative overflow-y-auto no-scrollbar">
@@ -74,7 +75,7 @@
             <!-- VIEW 1: INTRO -->
             <section id="intro-view" class="p-8 flex flex-col h-full items-center justify-center text-center space-y-8">
                 <div class="space-y-4 slide-up">
-                    <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold">AI 성향 분석</span>
+                    <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold">데이터 성향 분석</span>
                     <h1 class="text-4xl font-extrabold leading-tight text-gray-900">
                         나에게 딱 맞는<br>
                         <span class="text-[#3182F6]">운명적 차</span>는?
@@ -90,7 +91,6 @@
                 </div>
 
                 <div class="w-full space-y-3 slide-up" style="animation-delay: 0.2s;">
-                    <!-- 버튼 ID 확인 -->
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
                         테스트 시작하기
                     </button>
@@ -125,7 +125,7 @@
             <section id="loading-view" class="hidden p-8 flex flex-col h-full items-center justify-center text-center">
                 <div class="w-20 h-20 border-4 border-gray-100 border-t-[#3182F6] rounded-full animate-spin mb-8"></div>
                 <h3 id="loading-text" class="text-2xl font-bold text-gray-800 mb-2">분석 중...</h3>
-                <p class="text-gray-500">당신의 드라이빙 DNA를 추출하고 있습니다.</p>
+                <p class="text-gray-500">당신의 드라이빙 DNA를 확인하고 있습니다.</p>
             </section>
 
             <!-- VIEW 4: RESULT -->
@@ -170,10 +170,10 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 pb-8 slide-up" style="animation-delay: 0.4s;">
-                        <button onclick="shareResult()" class="btn-press bg-[#3182F6] text-white py-4 rounded-xl font-bold">
+                        <button id="share-btn" class="btn-press bg-[#3182F6] text-white py-4 rounded-xl font-bold">
                             결과 공유하기
                         </button>
-                        <button onclick="location.reload()" class="btn-press bg-gray-200 text-gray-700 py-4 rounded-xl font-bold">
+                        <button id="restart-btn" class="btn-press bg-gray-200 text-gray-700 py-4 rounded-xl font-bold">
                             다시 테스트하기
                         </button>
                     </div>
@@ -188,7 +188,6 @@
         import { getFirestore, doc, onSnapshot, setDoc, updateDoc, increment, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Safe Config Loader ---
-        // Vercel 등 외부 환경에서는 __firebase_config가 없을 수 있으므로 예외 처리
         let db = null;
         let auth = null;
         let appId = 'default-app-id';
@@ -203,10 +202,10 @@
                 if (typeof __app_id !== 'undefined') appId = __app_id;
                 isFirebaseAvailable = true;
             } else {
-                console.log("No Firebase config found. Running in Offline Mode.");
+                console.log("Offline Mode.");
             }
         } catch (e) {
-            console.warn("Firebase initialization skipped (Offline Mode):", e);
+            console.warn("Firebase Init Skipped:", e);
         }
 
         const COLLECTION_NAME = 'stats';
@@ -215,7 +214,6 @@
         // 1. Initialize DB Logic (Safe Mode)
         async function initFirebase() {
             if (!isFirebaseAvailable) {
-                // Mock Logic for Offline Mode
                 let count = localStorage.getItem('mock_participant_count') || 0;
                 updateParticipantCount(parseInt(count));
                 return;
@@ -241,7 +239,6 @@
                         updateParticipantCount(0);
                     }
                 }, (error) => {
-                    // Fallback on permission error
                     console.log("DB permission error, using local fallback");
                     updateParticipantCount(0);
                 });
@@ -271,10 +268,9 @@
                 try {
                     await updateDoc(docRef, { participants: increment(1) });
                 } catch (e) {
-                    console.log("DB update failed");
+                    // Ignore
                 }
             } else {
-                // Local Storage Increment for Offline Mode
                 let current = parseInt(localStorage.getItem('mock_participant_count') || '0');
                 current++;
                 localStorage.setItem('mock_participant_count', current);
@@ -282,10 +278,7 @@
             }
         }
 
-        // Initialize immediately
-        initFirebase();
-
-        // 2. Quiz Logic
+        // 2. Data
         const questions = [
             {
                 id: 1,
@@ -389,8 +382,10 @@
             }
         ];
 
+        // Added ID for URL sharing
         const carResults = [
             {
+                id: "porsche911",
                 name: "포르쉐 911",
                 type: "S",
                 secondary: "L",
@@ -401,6 +396,7 @@
                 stats: [90, 80, 40, 30, 60]
             },
             {
+                id: "g90",
                 name: "제네시스 G90",
                 type: "L",
                 secondary: "P",
@@ -411,6 +407,7 @@
                 stats: [40, 95, 70, 50, 20]
             },
             {
+                id: "modely",
                 name: "테슬라 모델 Y",
                 type: "E",
                 secondary: "P",
@@ -421,6 +418,7 @@
                 stats: [60, 50, 70, 95, 40]
             },
             {
+                id: "xc90",
                 name: "볼보 XC90",
                 type: "P",
                 secondary: "L",
@@ -431,6 +429,7 @@
                 stats: [40, 60, 95, 60, 50]
             },
             {
+                id: "wrangler",
                 name: "지프 랭글러",
                 type: "A",
                 secondary: "S",
@@ -441,6 +440,7 @@
                 stats: [60, 40, 50, 30, 95]
             },
             {
+                id: "taycan",
                 name: "포르쉐 타이칸",
                 type: "L",
                 secondary: "E",
@@ -451,6 +451,7 @@
                 stats: [80, 90, 40, 85, 30]
             },
             {
+                id: "avanten",
                 name: "현대 아반떼 N",
                 type: "S",
                 secondary: "P",
@@ -461,6 +462,7 @@
                 stats: [85, 30, 70, 40, 50]
             },
             {
+                id: "ray",
                 name: "기아 레이",
                 type: "P",
                 secondary: "E",
@@ -474,24 +476,25 @@
 
         let currentQuestion = 0;
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
+        let finalResultId = null; // Store current result ID
+
+        // --- Core Functions ---
 
         function startQuiz() {
-            // UI Update
-            const introView = document.getElementById('intro-view');
+            document.getElementById('intro-view').classList.add('hidden');
             const quizView = document.getElementById('quiz-view');
-
-            if (introView && quizView) {
-                introView.classList.add('hidden');
-                quizView.classList.remove('hidden');
-                quizView.classList.add('flex');
-            } else {
-                console.error("View elements not found");
-                return;
-            }
+            quizView.classList.remove('hidden');
+            quizView.classList.add('flex');
             
-            // Logic
             incrementParticipants();
             renderQuestion();
+        }
+
+        function restartQuiz() {
+            // Remove Query Params from URL without reload
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.pushState({path:newUrl},'',newUrl);
+            location.reload();
         }
 
         function renderQuestion() {
@@ -524,19 +527,15 @@
 
         function handleAnswer(points) {
             for (const key in points) {
-                if (scores[key] !== undefined) {
-                    scores[key] += points[key];
-                }
+                if (scores[key] !== undefined) scores[key] += points[key];
             }
             currentQuestion++;
             setTimeout(renderQuestion, 150);
         }
 
         function showLoading() {
-            const quizView = document.getElementById('quiz-view');
+            document.getElementById('quiz-view').classList.add('hidden');
             const loadingView = document.getElementById('loading-view');
-            
-            quizView.classList.add('hidden');
             loadingView.classList.remove('hidden');
             loadingView.classList.add('flex');
 
@@ -549,7 +548,6 @@
             
             const loadingText = document.getElementById('loading-text');
             let i = 0;
-            
             const interval = setInterval(() => {
                 loadingText.innerText = texts[i % texts.length];
                 i++;
@@ -582,25 +580,38 @@
             let finalCar = candidates.find(c => c.secondary === secondaryTrait) || candidates[0];
             if (!finalCar) finalCar = carResults[0];
 
-            document.getElementById('result-name').innerText = finalCar.name;
-            document.getElementById('result-icon').innerText = finalCar.icon;
-            document.getElementById('result-desc').innerText = finalCar.desc;
-            document.getElementById('music-rec').innerText = finalCar.music;
+            renderResultData(finalCar);
+        }
+
+        function renderResultData(carData) {
+            finalResultId = carData.id; // Save for sharing
+
+            document.getElementById('result-name').innerText = carData.name;
+            document.getElementById('result-icon').innerText = carData.icon;
+            document.getElementById('result-desc').innerText = carData.desc;
+            document.getElementById('music-rec').innerText = carData.music;
             
             const tagsContainer = document.getElementById('result-tags');
             tagsContainer.innerHTML = '';
-            finalCar.tags.forEach(tag => {
+            carData.tags.forEach(tag => {
                 const span = document.createElement('span');
                 span.className = "px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 font-medium";
                 span.innerText = tag;
                 tagsContainer.appendChild(span);
             });
 
-            renderChart(finalCar.stats);
+            renderChart(carData.stats);
         }
 
         function renderChart(statsData) {
-            const ctx = document.getElementById('radarChart').getContext('2d');
+            const canvas = document.getElementById('radarChart');
+            // Destroy existing chart if any
+            let chartStatus = Chart.getChart("radarChart"); 
+            if (chartStatus != undefined) {
+                chartStatus.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
             new Chart(ctx, {
                 type: 'radar',
                 data: {
@@ -639,27 +650,59 @@
             });
         }
 
-        window.shareResult = function() {
+        function shareResult() {
+            // Generate Share URL with Result ID
+            const baseUrl = window.location.href.split('?')[0];
+            const shareUrl = `${baseUrl}?result=${finalResultId}`;
+
             if (navigator.share) {
                 navigator.share({
                     title: '운명적 자동차 테스트',
                     text: `나에게 딱 맞는 차는 ${document.getElementById('result-name').innerText}입니다!`,
-                    url: window.location.href,
+                    url: shareUrl,
                 });
             } else {
-                alert('결과가 복사되었습니다!');
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('결과 링크가 복사되었습니다!');
+                }).catch(() => {
+                    alert('링크 복사에 실패했습니다.');
+                });
             }
         }
 
-        // --- Event Binding ---
-        // Ensure DOM is ready and attach listener safely
-        const startBtn = document.getElementById('start-btn');
-        if (startBtn) {
-            startBtn.addEventListener('click', startQuiz);
-            console.log("Start button listener attached");
-        } else {
-            console.error("Start button not found in DOM");
+        // --- Init: Check URL Params for Shared Result ---
+        function checkUrlForSharedResult() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const resultId = urlParams.get('result');
+
+            if (resultId) {
+                const sharedCar = carResults.find(c => c.id === resultId);
+                if (sharedCar) {
+                    // Hide Intro, Show Result Immediately
+                    document.getElementById('intro-view').classList.add('hidden');
+                    document.getElementById('result-view').classList.remove('hidden');
+                    
+                    // Change "Restart" button text to "Test Myself"
+                    const restartBtn = document.getElementById('restart-btn');
+                    restartBtn.innerText = "나도 테스트하기";
+                    
+                    renderResultData(sharedCar);
+                }
+            }
         }
+
+        // --- Event Listeners ---
+        initFirebase();
+        checkUrlForSharedResult(); // Run on load
+
+        const startBtn = document.getElementById('start-btn');
+        if (startBtn) startBtn.addEventListener('click', startQuiz);
+
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) shareBtn.addEventListener('click', shareResult);
+
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) restartBtn.addEventListener('click', restartQuiz);
 
     </script>
 </body>
