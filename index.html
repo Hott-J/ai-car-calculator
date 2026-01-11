@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="w-full space-y-3 slide-up" style="animation-delay: 0.2s;">
-                    <!-- Removed onclick from HTML to prevent errors -->
+                    <!-- 버튼 ID 확인 -->
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
                         테스트 시작하기
                     </button>
@@ -187,18 +187,40 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc, updateDoc, increment, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // --- Safe Config Loader ---
+        // Vercel 등 외부 환경에서는 __firebase_config가 없을 수 있으므로 예외 처리
+        let db = null;
+        let auth = null;
+        let appId = 'default-app-id';
+        let isFirebaseAvailable = false;
 
-        // Consts
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                if (typeof __app_id !== 'undefined') appId = __app_id;
+                isFirebaseAvailable = true;
+            } else {
+                console.log("No Firebase config found. Running in Offline Mode.");
+            }
+        } catch (e) {
+            console.warn("Firebase initialization skipped (Offline Mode):", e);
+        }
+
         const COLLECTION_NAME = 'stats';
         const DOC_ID = 'global_counts';
 
-        // 1. Initialize DB & Auth
+        // 1. Initialize DB Logic (Safe Mode)
         async function initFirebase() {
+            if (!isFirebaseAvailable) {
+                // Mock Logic for Offline Mode
+                let count = localStorage.getItem('mock_participant_count') || 0;
+                updateParticipantCount(parseInt(count));
+                return;
+            }
+
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -208,26 +230,24 @@
 
                 if (!auth.currentUser) return;
 
-                // Path: /artifacts/{appId}/public/data/stats/global_counts
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
 
-                // Listen to real-time updates
                 onSnapshot(docRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         updateParticipantCount(data.participants || 0);
                     } else {
-                        // Create with 0 if not exists
                         setDoc(docRef, { participants: 0 });
                         updateParticipantCount(0);
                     }
                 }, (error) => {
-                    console.error("DB Error:", error);
+                    // Fallback on permission error
+                    console.log("DB permission error, using local fallback");
                     updateParticipantCount(0);
                 });
 
             } catch (e) {
-                console.error("Auth Error:", e);
+                console.log("Auth/DB Error, using offline mode", e);
                 updateParticipantCount(0);
             }
         }
@@ -246,18 +266,26 @@
         }
 
         async function incrementParticipants() {
-            if (!auth.currentUser) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
-            try {
-                await updateDoc(docRef, { participants: increment(1) });
-            } catch (e) {
-                console.log("Count update failed (expected if first run/network)", e);
+            if (isFirebaseAvailable && auth && auth.currentUser) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, DOC_ID);
+                try {
+                    await updateDoc(docRef, { participants: increment(1) });
+                } catch (e) {
+                    console.log("DB update failed");
+                }
+            } else {
+                // Local Storage Increment for Offline Mode
+                let current = parseInt(localStorage.getItem('mock_participant_count') || '0');
+                current++;
+                localStorage.setItem('mock_participant_count', current);
+                updateParticipantCount(current);
             }
         }
 
+        // Initialize immediately
         initFirebase();
 
-        // 2. Quiz Logic (Moved inside module to ensure cleaner scope)
+        // 2. Quiz Logic
         const questions = [
             {
                 id: 1,
@@ -447,13 +475,19 @@
         let currentQuestion = 0;
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
 
-        // Functions
         function startQuiz() {
-            // UI Transition first (Immediate response)
-            document.getElementById('intro-view').classList.add('hidden');
+            // UI Update
+            const introView = document.getElementById('intro-view');
             const quizView = document.getElementById('quiz-view');
-            quizView.classList.remove('hidden');
-            quizView.classList.add('flex');
+
+            if (introView && quizView) {
+                introView.classList.add('hidden');
+                quizView.classList.remove('hidden');
+                quizView.classList.add('flex');
+            } else {
+                console.error("View elements not found");
+                return;
+            }
             
             // Logic
             incrementParticipants();
@@ -483,7 +517,6 @@
                 const btn = document.createElement('button');
                 btn.className = "btn-press w-full p-4 text-left bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded-xl transition-all duration-200 text-gray-700 font-medium text-lg";
                 btn.innerText = opt.text;
-                // Directly call internal function
                 btn.onclick = () => handleAnswer(opt.scores);
                 optionsContainer.appendChild(btn);
             });
@@ -618,10 +651,14 @@
             }
         }
 
-        // Attach Event Listeners
+        // --- Event Binding ---
+        // Ensure DOM is ready and attach listener safely
         const startBtn = document.getElementById('start-btn');
         if (startBtn) {
             startBtn.addEventListener('click', startQuiz);
+            console.log("Start button listener attached");
+        } else {
+            console.error("Start button not found in DOM");
         }
 
     </script>
