@@ -68,17 +68,18 @@
         #toast {
             visibility: hidden;
             min-width: 250px;
-            background-color: rgba(51, 51, 51, 0.9);
+            background-color: rgba(51, 51, 51, 0.95);
             color: #fff;
             text-align: center;
             border-radius: 50px;
             padding: 16px;
             position: fixed;
-            z-index: 50;
+            z-index: 100;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
             font-size: 15px;
+            font-weight: 500;
             opacity: 0;
             transition: opacity 0.3s, bottom 0.3s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -216,17 +217,11 @@
 
     <script>
         // --- 1. Fake "Global" Participant Count Logic ---
-        // DB 없이도 '시간'을 기준으로 숫자를 계산하여 모두에게 비슷한 숫자를 보여줍니다.
         function updateSimulatedCount() {
-            // 기준 시간: 2025년 1월 1일
             const startDate = new Date('2025-01-01T00:00:00').getTime();
             const now = new Date().getTime();
-            
-            // 경과 시간(초) / 30초마다 1명씩 증가한다고 가정 (숫자 조절 가능)
-            // 기본값 1200명 + 시간 경과 증가분
             const baseCount = 1204;
-            const increaseFactor = Math.floor((now - startDate) / 30000); // 30초마다 1 증가
-            
+            const increaseFactor = Math.floor((now - startDate) / 30000); 
             const totalCount = baseCount + increaseFactor;
             
             const countEl = document.getElementById('participant-count');
@@ -235,7 +230,6 @@
             }
         }
         
-        // 페이지 로드 시 및 10초마다 카운트 업데이트
         updateSimulatedCount();
         setInterval(updateSimulatedCount, 10000);
 
@@ -451,7 +445,6 @@
         }
 
         function restartQuiz() {
-            // URL 파라미터 제거 후 리로드 (깔끔하게 초기화)
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.pushState({path:newUrl},'',newUrl);
             location.reload();
@@ -490,7 +483,6 @@
                 if (scores[key] !== undefined) scores[key] += points[key];
             }
             currentQuestion++;
-            // 약간의 딜레이로 자연스럽게 전환
             setTimeout(renderQuestion, 150);
         }
 
@@ -610,30 +602,33 @@
             });
         }
 
-        // --- 4. Enhanced Share Function (Web & Mobile Compatible) ---
+        // --- 4. Enhanced Share Function (Mobile Detection) ---
         function shareResult() {
             const baseUrl = window.location.href.split('?')[0];
             const shareUrl = `${baseUrl}?result=${finalResultId}`;
+            
+            // 모바일 디바이스 감지 정규식
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // 1. 모바일 공유하기 (navigator.share) 시도
-            if (navigator.share) {
+            // 모바일이고, 공유 기능이 있을 때만 네이티브 공유 사용
+            if (isMobile && navigator.share) {
                 navigator.share({
                     title: '운명적 자동차 테스트',
                     text: `나에게 딱 맞는 차는 ${document.getElementById('result-name').innerText}입니다!`,
                     url: shareUrl,
                 }).catch((error) => {
-                    // 사용자가 공유 취소하거나 에러가 나면 클립보드 복사로 fallback
                     console.log('Share failed or canceled', error);
-                    copyToClipboard(shareUrl);
+                    // 취소나 에러 시 그냥 조용히 넘어감 (사용자가 취소했을 수 있음)
+                    // 혹은 여기서도 클립보드 복사를 시도할 수 있지만, '다시 시도' 오류 방지를 위해
+                    // 명확한 에러가 아니면 무시
                 });
             } else {
-                // 2. PC 등 지원 안하면 바로 클립보드 복사
+                // PC이거나 공유 기능 없는 경우: 무조건 클립보드 복사
                 copyToClipboard(shareUrl);
             }
         }
 
         function copyToClipboard(text) {
-            // navigator.clipboard API 사용 (최신 브라우저)
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     showToast();
@@ -641,7 +636,6 @@
                     fallbackCopyTextToClipboard(text);
                 });
             } else {
-                // 구형 방식 Fallback
                 fallbackCopyTextToClipboard(text);
             }
         }
@@ -649,7 +643,7 @@
         function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            textArea.style.position = "fixed";  // 화면 밖으로 안 나가게
+            textArea.style.position = "fixed";  
             textArea.style.left = "-9999px";
             document.body.appendChild(textArea);
             textArea.focus();
@@ -659,7 +653,8 @@
                 document.execCommand('copy');
                 showToast();
             } catch (err) {
-                alert('링크 복사에 실패했습니다. URL을 직접 복사해주세요.');
+                // 정말 모든 복사가 실패했을 때만 (거의 없음)
+                alert('링크 복사에 실패했습니다.');
             }
             document.body.removeChild(textArea);
         }
@@ -690,7 +685,6 @@
             }
         }
 
-        // 실행
         checkUrlForSharedResult();
 
         const startBtn = document.getElementById('start-btn');
