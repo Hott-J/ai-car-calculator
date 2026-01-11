@@ -90,6 +90,33 @@
             opacity: 1;
             bottom: 50px;
         }
+
+        /* Music Player Animation */
+        .equalizer {
+            display: flex;
+            align-items: flex-end;
+            height: 12px;
+            gap: 2px;
+        }
+        .bar {
+            width: 3px;
+            background-color: #3182F6;
+            animation: equalizer 1s infinite;
+        }
+        .bar:nth-child(1) { animation-duration: 0.6s; }
+        .bar:nth-child(2) { animation-duration: 0.8s; }
+        .bar:nth-child(3) { animation-duration: 0.5s; }
+        .bar:nth-child(4) { animation-duration: 0.7s; }
+
+        @keyframes equalizer {
+            0% { height: 2px; }
+            50% { height: 12px; }
+            100% { height: 2px; }
+        }
+        .paused .bar {
+            animation-play-state: paused;
+            height: 2px !important;
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen flex justify-center items-start pt-0 md:pt-10 pb-10">
@@ -124,6 +151,7 @@
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
                         테스트 시작하기
                     </button>
+                    <!-- Simulated Global Count -->
                     <p class="text-xs text-gray-400">
                         현재 <span id="participant-count" class="font-bold text-[#3182F6]">1,204</span>명이 참여했어요
                     </p>
@@ -197,13 +225,44 @@
                         </div>
                     </div>
 
+                    <!-- Enhanced Music Player -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.3s;">
-                        <h3 class="text-lg font-bold text-gray-800 mb-3">드라이빙 플레이리스트 추천</h3>
-                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
-                            <div class="w-12 h-12 bg-[#E8F3FF] rounded-full flex items-center justify-center text-xl">🎵</div>
-                            <div>
-                                <p id="music-rec" class="font-bold text-gray-900">Music Title</p>
-                                <p class="text-xs text-gray-500">안전운전을 위한 선곡</p>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">드라이빙 플레이리스트</h3>
+                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl border border-gray-100 relative overflow-hidden">
+                            <!-- Background Album Art Blur (Dynamic) -->
+                            <div id="album-bg" class="absolute inset-0 bg-gray-200 opacity-20 bg-cover bg-center blur-md z-0"></div>
+                            
+                            <!-- Content -->
+                            <div class="relative z-10 w-12 h-12 bg-gray-200 rounded-lg shadow-sm flex-shrink-0 overflow-hidden group">
+                                <img id="album-art" src="" class="w-full h-full object-cover hidden" alt="Album Art">
+                                <div class="w-full h-full flex items-center justify-center text-2xl bg-gray-100" id="album-placeholder">🎵</div>
+                            </div>
+                            
+                            <div class="relative z-10 flex-1 min-w-0">
+                                <p id="music-title" class="font-bold text-gray-900 truncate">Song Title</p>
+                                <p id="music-artist" class="text-xs text-gray-500 truncate">Artist</p>
+                            </div>
+
+                            <button id="play-btn" class="relative z-10 w-10 h-10 rounded-full bg-[#3182F6] text-white flex items-center justify-center shadow-md btn-press disabled:bg-gray-300" onclick="toggleMusic()">
+                                <!-- Play Icon -->
+                                <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                </svg>
+                                <!-- Pause Icon -->
+                                <svg id="icon-pause" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Mini Equalizer -->
+                        <div class="flex justify-between items-center mt-2 px-2">
+                            <span class="text-[10px] text-gray-400">30초 미리듣기 제공 (Apple Music)</span>
+                            <div id="equalizer" class="equalizer paused opacity-0 transition-opacity">
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
                             </div>
                         </div>
                     </div>
@@ -220,8 +279,9 @@
             </section>
         </div>
         
-        <!-- Toast Message Element -->
+        <!-- Toast & Audio -->
         <div id="toast">링크가 복사되었습니다!</div>
+        <audio id="bgm-player" preload="none"></audio>
     </main>
 
     <script>
@@ -347,6 +407,7 @@
             }
         ];
 
+        // Added 'musicQuery' for iTunes Search
         const carResults = [
             {
                 id: "porsche911",
@@ -440,13 +501,15 @@
 
         let currentQuestion = 0;
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
-        let history = []; // Stack to store points for back navigation
+        let history = []; 
         let finalResultId = null; 
+        
+        // Music Player State
+        const audioPlayer = document.getElementById('bgm-player');
 
         // --- 3. Interaction Functions ---
 
         function startQuiz() {
-            // Reset everything
             currentQuestion = 0;
             scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
             history = [];
@@ -457,6 +520,9 @@
             quizView.classList.add('flex');
             
             renderQuestion();
+            
+            // Stop music if playing
+            stopMusic();
         }
 
         function restartQuiz() {
@@ -471,7 +537,6 @@
                 return;
             }
 
-            // Back Button Visibility Logic
             const prevBtn = document.getElementById('prev-btn');
             if (currentQuestion > 0) {
                 prevBtn.classList.remove('hidden');
@@ -502,10 +567,7 @@
         }
 
         function handleAnswer(points) {
-            // Store choice in history before updating logic
             history.push(points);
-
-            // Add Points
             for (const key in points) {
                 if (scores[key] !== undefined) scores[key] += points[key];
             }
@@ -516,8 +578,6 @@
         function handlePrev() {
             if (currentQuestion > 0 && history.length > 0) {
                 const lastPoints = history.pop();
-                
-                // Subtract Points (Undo)
                 for (const key in lastPoints) {
                     if (scores[key] !== undefined) scores[key] -= lastPoints[key];
                 }
@@ -582,7 +642,6 @@
             document.getElementById('result-name').innerText = carData.name;
             document.getElementById('result-icon').innerText = carData.icon;
             document.getElementById('result-desc').innerText = carData.desc;
-            document.getElementById('music-rec').innerText = carData.music;
             
             const tagsContainer = document.getElementById('result-tags');
             tagsContainer.innerHTML = '';
@@ -594,6 +653,9 @@
             });
 
             renderChart(carData.stats);
+            
+            // Search Music
+            searchMusicPreview(carData.music);
         }
 
         function renderChart(statsData) {
@@ -642,6 +704,91 @@
             });
         }
 
+        // --- Music Player Logic (iTunes API) ---
+        async function searchMusicPreview(term) {
+            const titleEl = document.getElementById('music-title');
+            const artistEl = document.getElementById('music-artist');
+            const playBtn = document.getElementById('play-btn');
+            const albumArt = document.getElementById('album-art');
+            const albumBg = document.getElementById('album-bg');
+            const albumPlaceholder = document.getElementById('album-placeholder');
+
+            // Reset UI
+            titleEl.innerText = "검색 중...";
+            artistEl.innerText = term;
+            playBtn.disabled = true;
+            stopMusic();
+
+            try {
+                // iTunes Search API (No Key Required)
+                const encodedTerm = encodeURIComponent(term);
+                const response = await fetch(`https://itunes.apple.com/search?term=${encodedTerm}&media=music&entity=song&limit=1`);
+                const data = await response.json();
+
+                if (data.resultCount > 0) {
+                    const track = data.results[0];
+                    titleEl.innerText = track.trackName;
+                    artistEl.innerText = track.artistName;
+                    
+                    // Set Audio Source
+                    audioPlayer.src = track.previewUrl;
+                    audioPlayer.volume = 0.5;
+                    
+                    // Set Artwork
+                    if(track.artworkUrl100) {
+                        const artUrl = track.artworkUrl100.replace('100x100', '300x300'); // Get higher res
+                        albumArt.src = artUrl;
+                        albumArt.classList.remove('hidden');
+                        albumPlaceholder.classList.add('hidden');
+                        albumBg.style.backgroundImage = `url(${artUrl})`;
+                    }
+
+                    playBtn.disabled = false;
+                } else {
+                    titleEl.innerText = "음악 정보를 찾을 수 없어요";
+                    artistEl.innerText = term;
+                }
+            } catch (error) {
+                console.error("Music fetch error:", error);
+                titleEl.innerText = term;
+                artistEl.innerText = "미리듣기 불가";
+            }
+        }
+
+        window.toggleMusic = function() {
+            const playIcon = document.getElementById('icon-play');
+            const pauseIcon = document.getElementById('icon-pause');
+            const equalizer = document.getElementById('equalizer');
+
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                equalizer.classList.remove('opacity-0');
+                equalizer.classList.remove('paused');
+            } else {
+                audioPlayer.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                equalizer.classList.add('paused');
+            }
+        };
+
+        function stopMusic() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            document.getElementById('icon-play').classList.remove('hidden');
+            document.getElementById('icon-pause').classList.add('hidden');
+            document.getElementById('equalizer').classList.add('paused');
+            document.getElementById('equalizer').classList.add('opacity-0');
+        }
+
+        // Auto-stop when audio ends
+        audioPlayer.addEventListener('ended', () => {
+            stopMusic();
+        });
+
+
         // --- 4. Enhanced Share Function ---
         function shareResult() {
             const baseUrl = window.location.href.split('?')[0];
@@ -682,7 +829,6 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
             try {
                 document.execCommand('copy');
                 showToast();
@@ -709,10 +855,8 @@
                 if (sharedCar) {
                     document.getElementById('intro-view').classList.add('hidden');
                     document.getElementById('result-view').classList.remove('hidden');
-                    
                     const restartBtn = document.getElementById('restart-btn');
                     restartBtn.innerText = "나도 테스트하기";
-                    
                     renderResultData(sharedCar);
                 }
             }
@@ -729,7 +873,6 @@
         const restartBtn = document.getElementById('restart-btn');
         if (restartBtn) restartBtn.addEventListener('click', restartQuiz);
 
-        // Add Listener for Prev Button
         const prevBtn = document.getElementById('prev-btn');
         if (prevBtn) prevBtn.addEventListener('click', handlePrev);
 
