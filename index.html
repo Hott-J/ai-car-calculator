@@ -124,7 +124,6 @@
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200">
                         테스트 시작하기
                     </button>
-                    <!-- Simulated Global Count -->
                     <p class="text-xs text-gray-400">
                         현재 <span id="participant-count" class="font-bold text-[#3182F6]">1,204</span>명이 참여했어요
                     </p>
@@ -132,8 +131,18 @@
             </section>
 
             <!-- VIEW 2: QUIZ -->
-            <section id="quiz-view" class="hidden p-6 flex flex-col h-full">
-                <div class="w-full h-2 bg-gray-100 rounded-full mb-8 overflow-hidden">
+            <section id="quiz-view" class="hidden p-6 flex flex-col h-full relative">
+                <!-- Back Button -->
+                <div class="w-full flex items-center mb-4 min-h-[24px]">
+                    <button id="prev-btn" class="hidden text-gray-400 hover:text-gray-600 flex items-center text-sm font-medium transition-colors p-1 -ml-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        이전
+                    </button>
+                </div>
+
+                <div class="w-full h-2 bg-gray-100 rounded-full mb-6 overflow-hidden">
                     <div id="progress-bar" class="h-full bg-[#3182F6] transition-all duration-300 ease-out" style="width: 10%"></div>
                 </div>
 
@@ -431,11 +440,17 @@
 
         let currentQuestion = 0;
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
+        let history = []; // Stack to store points for back navigation
         let finalResultId = null; 
 
         // --- 3. Interaction Functions ---
 
         function startQuiz() {
+            // Reset everything
+            currentQuestion = 0;
+            scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
+            history = [];
+
             document.getElementById('intro-view').classList.add('hidden');
             const quizView = document.getElementById('quiz-view');
             quizView.classList.remove('hidden');
@@ -454,6 +469,14 @@
             if (currentQuestion >= questions.length) {
                 showLoading();
                 return;
+            }
+
+            // Back Button Visibility Logic
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentQuestion > 0) {
+                prevBtn.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
             }
 
             const q = questions[currentQuestion];
@@ -479,11 +502,28 @@
         }
 
         function handleAnswer(points) {
+            // Store choice in history before updating logic
+            history.push(points);
+
+            // Add Points
             for (const key in points) {
                 if (scores[key] !== undefined) scores[key] += points[key];
             }
             currentQuestion++;
             setTimeout(renderQuestion, 150);
+        }
+
+        function handlePrev() {
+            if (currentQuestion > 0 && history.length > 0) {
+                const lastPoints = history.pop();
+                
+                // Subtract Points (Undo)
+                for (const key in lastPoints) {
+                    if (scores[key] !== undefined) scores[key] -= lastPoints[key];
+                }
+                currentQuestion--;
+                renderQuestion();
+            }
         }
 
         function showLoading() {
@@ -602,15 +642,13 @@
             });
         }
 
-        // --- 4. Enhanced Share Function (Mobile Detection) ---
+        // --- 4. Enhanced Share Function ---
         function shareResult() {
             const baseUrl = window.location.href.split('?')[0];
             const shareUrl = `${baseUrl}?result=${finalResultId}`;
             
-            // 모바일 디바이스 감지 정규식
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // 모바일이고, 공유 기능이 있을 때만 네이티브 공유 사용
             if (isMobile && navigator.share) {
                 navigator.share({
                     title: '운명적 자동차 테스트',
@@ -618,12 +656,8 @@
                     url: shareUrl,
                 }).catch((error) => {
                     console.log('Share failed or canceled', error);
-                    // 취소나 에러 시 그냥 조용히 넘어감 (사용자가 취소했을 수 있음)
-                    // 혹은 여기서도 클립보드 복사를 시도할 수 있지만, '다시 시도' 오류 방지를 위해
-                    // 명확한 에러가 아니면 무시
                 });
             } else {
-                // PC이거나 공유 기능 없는 경우: 무조건 클립보드 복사
                 copyToClipboard(shareUrl);
             }
         }
@@ -653,7 +687,6 @@
                 document.execCommand('copy');
                 showToast();
             } catch (err) {
-                // 정말 모든 복사가 실패했을 때만 (거의 없음)
                 alert('링크 복사에 실패했습니다.');
             }
             document.body.removeChild(textArea);
@@ -695,6 +728,10 @@
 
         const restartBtn = document.getElementById('restart-btn');
         if (restartBtn) restartBtn.addEventListener('click', restartQuiz);
+
+        // Add Listener for Prev Button
+        const prevBtn = document.getElementById('prev-btn');
+        if (prevBtn) prevBtn.addEventListener('click', handlePrev);
 
     </script>
 </body>
