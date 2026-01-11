@@ -225,6 +225,7 @@
 
                     <div class="bg-white p-6 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.3s;">
                         <h3 class="text-lg font-bold text-gray-800 mb-3">드라이빙 플레이리스트</h3>
+                        <!-- Music Player -->
                         <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl border border-gray-100 relative overflow-hidden">
                             <div id="album-bg" class="absolute inset-0 bg-gray-200 opacity-20 bg-cover bg-center blur-md z-0"></div>
                             
@@ -272,10 +273,12 @@
         </div>
         
         <div id="toast">링크가 복사되었습니다!</div>
-        <audio id="bgm-player" preload="none" crossorigin="anonymous"></audio>
+        <!-- crossorigin, playsinline 추가 -->
+        <audio id="bgm-player" preload="none" crossorigin="anonymous" playsinline></audio>
     </main>
 
     <script>
+        // 1. Simulated Count
         function updateSimulatedCount() {
             const startDate = new Date('2025-01-01T00:00:00').getTime();
             const now = new Date().getTime();
@@ -283,13 +286,12 @@
             const increaseFactor = Math.floor((now - startDate) / 30000); 
             const totalCount = baseCount + increaseFactor;
             const countEl = document.getElementById('participant-count');
-            if (countEl) {
-                countEl.innerText = totalCount.toLocaleString();
-            }
+            if (countEl) countEl.innerText = totalCount.toLocaleString();
         }
         updateSimulatedCount();
         setInterval(updateSimulatedCount, 10000);
 
+        // 2. Data (Latest K-POP Songs)
         const questions = [
             {
                 id: 1,
@@ -393,6 +395,7 @@
             }
         ];
 
+        // Updated Music List (Trendy K-POP)
         const carResults = [
             {
                 id: "porsche911",
@@ -400,9 +403,9 @@
                 type: "S",
                 secondary: "L",
                 icon: "🏎️",
-                desc: "당신은 멈추지 않는 심장을 가진 '열정의 레이서'입니다. 남들의 시선보다는 내가 느끼는 즐거움이 가장 중요하죠. 일상에서도 스릴을 즐기며, 목표를 향해 직진하는 당신에게는 영원한 드림카, 포르쉐 911이 딱입니다.",
+                desc: "멈추지 않는 심장! 목표를 향해 직진하는 열정적인 레이서 타입입니다. 스릴을 즐기는 당신에게 어울리는 최고의 드림카입니다.",
                 tags: ["#스피드광", "#자기관리", "#성공의아이콘"],
-                music: "The Weeknd - Blinding Lights",
+                music: "aespa Supernova", // Hype, Fast
                 stats: [90, 80, 40, 30, 60]
             },
             {
@@ -411,9 +414,9 @@
                 type: "L",
                 secondary: "P",
                 icon: "🤵",
-                desc: "당신은 품격과 여유를 중요시하는 '도시의 리더'입니다. 시끄러운 것보다는 정돈된 편안함을 선호하며, 주변 사람들을 챙기는 리더십도 있죠. 움직이는 VIP 라운지 같은 제네시스 G90이 당신의 품위를 지켜줄 거예요.",
+                desc: "품격과 여유를 중요시하는 도시의 리더입니다. 정돈된 편안함과 주변을 챙기는 리더십을 가진 당신에게 어울립니다.",
                 tags: ["#회장님포스", "#편안함", "#섬세함"],
-                music: "Frank Sinatra - Fly Me To The Moon",
+                music: "BIBI Bam Yang Gang", // Trendy but Chill/Classy
                 stats: [40, 95, 70, 50, 20]
             },
             {
@@ -422,9 +425,9 @@
                 type: "E",
                 secondary: "P",
                 icon: "🔋",
-                desc: "당신은 효율과 혁신을 사랑하는 '스마트 얼리어답터'입니다. 복잡한 절차보다는 심플하고 합리적인 해결책을 선호하죠. 남들보다 한 발 앞서 나가는 당신에게는, 미니멀리즘과 첨단 기술의 결정체 테슬라가 어울립니다.",
+                desc: "효율과 혁신을 사랑하는 스마트 얼리어답터! 복잡한 것보다는 심플하고 합리적인 최첨단 라이프를 추구합니다.",
                 tags: ["#미니멀리즘", "#테크충", "#효율중시"],
-                music: "Daft Punk - Technologic",
+                music: "TWS plot twist", // Fresh, New
                 stats: [60, 50, 70, 95, 40]
             },
             {
@@ -433,9 +436,9 @@
                 type: "P",
                 secondary: "L",
                 icon: "🛡️",
-                desc: "당신은 내 사람을 지키는 '든든한 수호자'입니다. 화려한 겉모습보다는 내실과 안전을 최우선으로 생각하죠. 신중하고 계획적인 당신에게는 세상에서 가장 안전한 차, 볼보가 최고의 파트너가 되어줄 겁니다.",
+                desc: "내 사람을 지키는 든든한 수호자. 화려함보다는 내실과 안전을 최우선으로 생각하는 신중한 타입입니다.",
                 tags: ["#안전제일", "#패밀리맨", "#북유럽감성"],
-                music: "Coldplay - Fix You",
+                music: "DAY6 Welcome to the Show", // Grand, Trustworthy
                 stats: [40, 60, 95, 60, 50]
             },
             {
@@ -444,9 +447,9 @@
                 type: "A",
                 secondary: "S",
                 icon: "🧗",
-                desc: "당신은 자유로운 영혼을 가진 '모험가'입니다. 정해진 길보다는 내가 가는 길이 곧 길이라고 믿죠. 답답한 도시를 벗어나 언제든 떠날 준비가 된 당신, 거침없는 지프 랭글러와 함께 야생으로 떠나보세요!",
+                desc: "자유로운 영혼의 모험가! 정해진 길보다는 내가 가는 길이 곧 길이라고 믿는 거침없는 성격입니다.",
                 tags: ["#캠핑", "#오프로드", "#마이웨이"],
-                music: "Imagine Dragons - Believer",
+                music: "(G)I-DLE Fate", // Pop-Rock, Driving
                 stats: [60, 40, 50, 30, 95]
             },
             {
@@ -455,9 +458,9 @@
                 type: "L",
                 secondary: "E",
                 icon: "⚡",
-                desc: "당신은 트렌드와 스타일을 놓치지 않는 '강남의 힙스터'입니다. 친환경도 중요하지만, 간지가 안 나는 건 용서할 수 없죠. 미래지향적인 기술과 압도적인 브랜드 파워를 모두 가진 타이칸이 당신의 페르소나입니다.",
+                desc: "트렌드와 스타일을 놓치지 않는 힙스터! 친환경도 중요하지만, 스타일이 안 나는 건 용서할 수 없습니다.",
                 tags: ["#영앤리치", "#트렌드세터", "#친환경간지"],
-                music: "NewJeans - Hype Boy",
+                music: "NewJeans How Sweet", // Hip, Trendy
                 stats: [80, 90, 40, 85, 30]
             },
             {
@@ -466,9 +469,9 @@
                 type: "S",
                 secondary: "P",
                 icon: "😈",
-                desc: "당신은 일상 속의 일탈을 꿈꾸는 '현실적 쾌락주의자'입니다. 평범해 보이지만 밟으면 튀어나가는 반전 매력을 가지고 있죠. 가성비 있게 최상의 즐거움을 뽑아내는 당신, 아반떼 N이 최고의 장난감이 될 거예요.",
+                desc: "일상 속의 짜릿한 일탈을 꿈꾸는 현실적 쾌락주의자! 평범해 보이지만 알고 보면 누구보다 뜨거운 열정을 가졌습니다.",
                 tags: ["#가성비", "#팝콘배기음", "#반전매력"],
-                music: "Eminem - Lose Yourself",
+                music: "ZICO SPOT!", // Exciting, Fun
                 stats: [85, 30, 70, 40, 50]
             },
             {
@@ -477,9 +480,9 @@
                 type: "P",
                 secondary: "E",
                 icon: "📦",
-                desc: "당신은 실속을 챙기는 '공간 마법사'입니다. 남들의 시선보다는 나만의 실용성과 활용도가 중요하죠. 작지만 모든 것을 다 할 수 있는 만능박스 레이처럼, 당신도 알짜배기 능력을 가진 사람이네요.",
+                desc: "실속을 챙기는 공간 마법사! 남들의 시선보다는 나만의 실용성과 활용도를 중요하게 생각하는 알짜배기입니다.",
                 tags: ["#차박", "#실용주의", "#경차혜택"],
-                music: "Jason Mraz - I'm Yours",
+                music: "QWER T.B.H", // Bouncy, Energetic
                 stats: [20, 20, 90, 70, 60]
             }
         ];
@@ -604,6 +607,65 @@
             renderResultData(finalCar);
         }
 
+        // Separate function to find URL (Executed on Load)
+        async function prepareMusic(term) {
+            const titleEl = document.getElementById('music-title');
+            const artistEl = document.getElementById('music-artist');
+            const playBtn = document.getElementById('play-btn');
+            const albumArt = document.getElementById('album-art');
+            const albumBg = document.getElementById('album-bg');
+            const albumPlaceholder = document.getElementById('album-placeholder');
+
+            titleEl.innerText = "음악 로딩 중...";
+            artistEl.innerText = term;
+            playBtn.disabled = true; // Disable until ready
+
+            try {
+                // Search iTunes (KR Store first)
+                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1`);
+                let data = await response.json();
+
+                // Fallback to US
+                if (data.resultCount === 0) {
+                     response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1`);
+                     data = await response.json();
+                }
+
+                if (data.resultCount > 0) {
+                    const track = data.results[0];
+                    titleEl.innerText = track.trackName;
+                    artistEl.innerText = track.artistName;
+                    
+                    // Force HTTPS for mobile safety
+                    let previewUrl = track.previewUrl;
+                    if(previewUrl && previewUrl.startsWith('http:')) {
+                        previewUrl = previewUrl.replace('http:', 'https:');
+                    }
+                    
+                    audioPlayer.src = previewUrl;
+                    audioPlayer.load(); // Important for mobile pre-loading
+                    audioPlayer.volume = 0.5;
+                    
+                    if(track.artworkUrl100) {
+                        let artUrl = track.artworkUrl100.replace('100x100', '300x300');
+                        if(artUrl.startsWith('http:')) artUrl = artUrl.replace('http:', 'https:');
+                        albumArt.src = artUrl;
+                        albumArt.classList.remove('hidden');
+                        albumPlaceholder.classList.add('hidden');
+                        albumBg.style.backgroundImage = `url(${artUrl})`;
+                    }
+                    playBtn.disabled = false; // Enable button
+                } else {
+                    titleEl.innerText = term;
+                    artistEl.innerText = "미리듣기 정보 없음";
+                }
+            } catch (error) {
+                console.error("Music Error:", error);
+                titleEl.innerText = term;
+                artistEl.innerText = "";
+            }
+        }
+
         function renderResultData(carData) {
             finalResultId = carData.id; 
             document.getElementById('result-name').innerText = carData.name;
@@ -618,7 +680,9 @@
                 tagsContainer.appendChild(span);
             });
             renderChart(carData.stats);
-            searchMusicPreview(carData.music);
+            
+            // Start searching immediately
+            prepareMusic(carData.music);
         }
 
         function renderChart(statsData) {
@@ -631,7 +695,7 @@
             new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['스피드 (Speed)', '과시력 (Swag)', '실용성 (Utility)', '최첨단 (Tech)', '모험심 (Wild)'],
+                    labels: ['스피드', '과시력', '실용성', '최첨단', '모험심'],
                     datasets: [{
                         label: '나의 자동차 DNA',
                         data: statsData,
@@ -666,78 +730,27 @@
             });
         }
 
-        async function searchMusicPreview(term) {
-            const titleEl = document.getElementById('music-title');
-            const artistEl = document.getElementById('music-artist');
-            const playBtn = document.getElementById('play-btn');
-            const albumArt = document.getElementById('album-art');
-            const albumBg = document.getElementById('album-bg');
-            const albumPlaceholder = document.getElementById('album-placeholder');
-
-            titleEl.innerText = "음악 검색 중...";
-            artistEl.innerText = term;
-            playBtn.disabled = true;
-            stopMusic();
-
-            try {
-                // 1. Clean Term: Remove hyphens for better matching
-                const cleanTerm = term.replace(/ - /g, ' ');
-                
-                // 2. Add explicit=Yes for censored content
-                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanTerm)}&country=KR&media=music&entity=song&limit=1&explicit=Yes`);
-                let data = await response.json();
-
-                if (data.resultCount === 0) {
-                     response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanTerm)}&country=US&media=music&entity=song&limit=1&explicit=Yes`);
-                     data = await response.json();
-                }
-
-                if (data.resultCount > 0) {
-                    const track = data.results[0];
-                    titleEl.innerText = track.trackName;
-                    artistEl.innerText = track.artistName;
-                    let previewUrl = track.previewUrl;
-                    if(previewUrl && previewUrl.startsWith('http:')) {
-                        previewUrl = previewUrl.replace('http:', 'https:');
-                    }
-                    audioPlayer.src = previewUrl;
-                    audioPlayer.volume = 0.5;
-                    
-                    if(track.artworkUrl100) {
-                        let artUrl = track.artworkUrl100.replace('100x100', '300x300');
-                        if(artUrl.startsWith('http:')) artUrl = artUrl.replace('http:', 'https:');
-                        albumArt.src = artUrl;
-                        albumArt.classList.remove('hidden');
-                        albumPlaceholder.classList.add('hidden');
-                        albumBg.style.backgroundImage = `url(${artUrl})`;
-                    }
-                    playBtn.disabled = false;
-                } else {
-                    throw new Error("No results");
-                }
-            } catch (error) {
-                console.error("Music fetch error:", error);
-                // Keep the text but disable play to not scare user
-                titleEl.innerText = term;
-                artistEl.innerText = "";
-                playBtn.disabled = true;
-            }
-        }
-
+        // Direct Interaction Function
         window.toggleMusic = function() {
             const playIcon = document.getElementById('icon-play');
             const pauseIcon = document.getElementById('icon-pause');
             const equalizer = document.getElementById('equalizer');
 
             if (audioPlayer.paused) {
-                audioPlayer.play().then(() => {
-                    playIcon.classList.add('hidden');
-                    pauseIcon.classList.remove('hidden');
-                    equalizer.classList.remove('opacity-0');
-                    equalizer.classList.remove('paused');
-                }).catch(e => {
-                    alert("재생 실패: 모바일 데이터 또는 권한을 확인해주세요.");
-                });
+                // Promise based play for debugging
+                const playPromise = audioPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        playIcon.classList.add('hidden');
+                        pauseIcon.classList.remove('hidden');
+                        equalizer.classList.remove('opacity-0');
+                        equalizer.classList.remove('paused');
+                    })
+                    .catch(error => {
+                        console.log("Play error:", error);
+                        alert("음악을 재생할 수 없습니다.");
+                    });
+                }
             } else {
                 audioPlayer.pause();
                 playIcon.classList.remove('hidden');
