@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>운명적 자동차 테스트 | 성향 분석</title>
     <meta name="description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요.">
-    <meta property="og:title" content="운명적 자동차 테스트">
-    <meta property="og:description" content="나의 성향을 분석해 가장 잘 어울리는 자동차를 추천해드립니다.">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -151,6 +148,7 @@
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200 min-h-[60px]">
                         테스트 시작하기
                     </button>
+                    <!-- Simulated Global Count -->
                     <p class="text-xs text-gray-400">
                         현재 <span id="participant-count" class="font-bold text-[#3182F6]">1,204</span>명이 참여했어요
                     </p>
@@ -225,7 +223,6 @@
 
                     <div class="bg-white p-6 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.3s;">
                         <h3 class="text-lg font-bold text-gray-800 mb-3">드라이빙 플레이리스트</h3>
-                        <!-- Music Player -->
                         <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl border border-gray-100 relative overflow-hidden">
                             <div id="album-bg" class="absolute inset-0 bg-gray-200 opacity-20 bg-cover bg-center blur-md z-0"></div>
                             
@@ -235,8 +232,8 @@
                             </div>
                             
                             <div class="relative z-10 flex-1 min-w-0">
-                                <p id="music-title" class="font-bold text-gray-900 truncate">Song Title</p>
-                                <p id="music-artist" class="text-xs text-gray-500 truncate">Artist</p>
+                                <p id="music-title" class="font-bold text-gray-900 truncate">로딩 중...</p>
+                                <p id="music-artist" class="text-xs text-gray-500 truncate">음악을 찾고 있어요</p>
                             </div>
 
                             <button id="play-btn" class="relative z-10 w-10 h-10 rounded-full bg-[#3182F6] text-white flex items-center justify-center shadow-md btn-press disabled:bg-gray-300 min-w-[40px]" onclick="toggleMusic()">
@@ -273,12 +270,10 @@
         </div>
         
         <div id="toast">링크가 복사되었습니다!</div>
-        <!-- crossorigin, playsinline 추가 -->
-        <audio id="bgm-player" preload="none" crossorigin="anonymous" playsinline></audio>
+        <audio id="bgm-player" preload="none" crossorigin="anonymous"></audio>
     </main>
 
     <script>
-        // 1. Simulated Count
         function updateSimulatedCount() {
             const startDate = new Date('2025-01-01T00:00:00').getTime();
             const now = new Date().getTime();
@@ -291,7 +286,6 @@
         updateSimulatedCount();
         setInterval(updateSimulatedCount, 10000);
 
-        // 2. Data (Latest K-POP Songs)
         const questions = [
             {
                 id: 1,
@@ -395,7 +389,7 @@
             }
         ];
 
-        // Updated Music List (Trendy K-POP)
+        // Music Data: Artist + Title only
         const carResults = [
             {
                 id: "porsche911",
@@ -405,7 +399,7 @@
                 icon: "🏎️",
                 desc: "멈추지 않는 심장! 목표를 향해 직진하는 열정적인 레이서 타입입니다. 스릴을 즐기는 당신에게 어울리는 최고의 드림카입니다.",
                 tags: ["#스피드광", "#자기관리", "#성공의아이콘"],
-                music: "aespa Supernova", // Hype, Fast
+                music: "aespa Supernova", 
                 stats: [90, 80, 40, 30, 60]
             },
             {
@@ -416,7 +410,7 @@
                 icon: "🤵",
                 desc: "품격과 여유를 중요시하는 도시의 리더입니다. 정돈된 편안함과 주변을 챙기는 리더십을 가진 당신에게 어울립니다.",
                 tags: ["#회장님포스", "#편안함", "#섬세함"],
-                music: "BIBI Bam Yang Gang", // Trendy but Chill/Classy
+                music: "BIBI Bam Yang Gang", 
                 stats: [40, 95, 70, 50, 20]
             },
             {
@@ -427,7 +421,7 @@
                 icon: "🔋",
                 desc: "효율과 혁신을 사랑하는 스마트 얼리어답터! 복잡한 것보다는 심플하고 합리적인 최첨단 라이프를 추구합니다.",
                 tags: ["#미니멀리즘", "#테크충", "#효율중시"],
-                music: "TWS plot twist", // Fresh, New
+                music: "TWS plot twist",
                 stats: [60, 50, 70, 95, 40]
             },
             {
@@ -438,7 +432,7 @@
                 icon: "🛡️",
                 desc: "내 사람을 지키는 든든한 수호자. 화려함보다는 내실과 안전을 최우선으로 생각하는 신중한 타입입니다.",
                 tags: ["#안전제일", "#패밀리맨", "#북유럽감성"],
-                music: "DAY6 Welcome to the Show", // Grand, Trustworthy
+                music: "DAY6 Welcome to the Show",
                 stats: [40, 60, 95, 60, 50]
             },
             {
@@ -449,7 +443,7 @@
                 icon: "🧗",
                 desc: "자유로운 영혼의 모험가! 정해진 길보다는 내가 가는 길이 곧 길이라고 믿는 거침없는 성격입니다.",
                 tags: ["#캠핑", "#오프로드", "#마이웨이"],
-                music: "(G)I-DLE Fate", // Pop-Rock, Driving
+                music: "(G)I-DLE Fate",
                 stats: [60, 40, 50, 30, 95]
             },
             {
@@ -460,7 +454,7 @@
                 icon: "⚡",
                 desc: "트렌드와 스타일을 놓치지 않는 힙스터! 친환경도 중요하지만, 스타일이 안 나는 건 용서할 수 없습니다.",
                 tags: ["#영앤리치", "#트렌드세터", "#친환경간지"],
-                music: "NewJeans How Sweet", // Hip, Trendy
+                music: "NewJeans How Sweet",
                 stats: [80, 90, 40, 85, 30]
             },
             {
@@ -471,7 +465,7 @@
                 icon: "😈",
                 desc: "일상 속의 짜릿한 일탈을 꿈꾸는 현실적 쾌락주의자! 평범해 보이지만 알고 보면 누구보다 뜨거운 열정을 가졌습니다.",
                 tags: ["#가성비", "#팝콘배기음", "#반전매력"],
-                music: "ZICO SPOT!", // Exciting, Fun
+                music: "ZICO SPOT!",
                 stats: [85, 30, 70, 40, 50]
             },
             {
@@ -482,7 +476,7 @@
                 icon: "📦",
                 desc: "실속을 챙기는 공간 마법사! 남들의 시선보다는 나만의 실용성과 활용도를 중요하게 생각하는 알짜배기입니다.",
                 tags: ["#차박", "#실용주의", "#경차혜택"],
-                music: "QWER T.B.H", // Bouncy, Energetic
+                music: "QWER T.B.H",
                 stats: [20, 20, 90, 70, 60]
             }
         ];
@@ -506,9 +500,7 @@
             try {
                 const cleanUrl = window.location.pathname; 
                 window.history.pushState({}, document.title, cleanUrl);
-            } catch (e) {
-                console.log("URL clean failed, ignoring", e);
-            }
+            } catch (e) { console.log("URL clean failed", e); }
         }
 
         function startQuiz() {
@@ -607,65 +599,6 @@
             renderResultData(finalCar);
         }
 
-        // Separate function to find URL (Executed on Load)
-        async function prepareMusic(term) {
-            const titleEl = document.getElementById('music-title');
-            const artistEl = document.getElementById('music-artist');
-            const playBtn = document.getElementById('play-btn');
-            const albumArt = document.getElementById('album-art');
-            const albumBg = document.getElementById('album-bg');
-            const albumPlaceholder = document.getElementById('album-placeholder');
-
-            titleEl.innerText = "음악 로딩 중...";
-            artistEl.innerText = term;
-            playBtn.disabled = true; // Disable until ready
-
-            try {
-                // Search iTunes (KR Store first)
-                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1`);
-                let data = await response.json();
-
-                // Fallback to US
-                if (data.resultCount === 0) {
-                     response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1`);
-                     data = await response.json();
-                }
-
-                if (data.resultCount > 0) {
-                    const track = data.results[0];
-                    titleEl.innerText = track.trackName;
-                    artistEl.innerText = track.artistName;
-                    
-                    // Force HTTPS for mobile safety
-                    let previewUrl = track.previewUrl;
-                    if(previewUrl && previewUrl.startsWith('http:')) {
-                        previewUrl = previewUrl.replace('http:', 'https:');
-                    }
-                    
-                    audioPlayer.src = previewUrl;
-                    audioPlayer.load(); // Important for mobile pre-loading
-                    audioPlayer.volume = 0.5;
-                    
-                    if(track.artworkUrl100) {
-                        let artUrl = track.artworkUrl100.replace('100x100', '300x300');
-                        if(artUrl.startsWith('http:')) artUrl = artUrl.replace('http:', 'https:');
-                        albumArt.src = artUrl;
-                        albumArt.classList.remove('hidden');
-                        albumPlaceholder.classList.add('hidden');
-                        albumBg.style.backgroundImage = `url(${artUrl})`;
-                    }
-                    playBtn.disabled = false; // Enable button
-                } else {
-                    titleEl.innerText = term;
-                    artistEl.innerText = "미리듣기 정보 없음";
-                }
-            } catch (error) {
-                console.error("Music Error:", error);
-                titleEl.innerText = term;
-                artistEl.innerText = "";
-            }
-        }
-
         function renderResultData(carData) {
             finalResultId = carData.id; 
             document.getElementById('result-name').innerText = carData.name;
@@ -680,9 +613,7 @@
                 tagsContainer.appendChild(span);
             });
             renderChart(carData.stats);
-            
-            // Start searching immediately
-            prepareMusic(carData.music);
+            searchMusicPreview(carData.music);
         }
 
         function renderChart(statsData) {
@@ -730,27 +661,82 @@
             });
         }
 
-        // Direct Interaction Function
+        // --- Music Logic (Improved) ---
+        async function searchMusicPreview(term) {
+            const titleEl = document.getElementById('music-title');
+            const artistEl = document.getElementById('music-artist');
+            const playBtn = document.getElementById('play-btn');
+            const albumArt = document.getElementById('album-art');
+            const albumBg = document.getElementById('album-bg');
+            const albumPlaceholder = document.getElementById('album-placeholder');
+
+            titleEl.innerText = "음악 로딩 중...";
+            artistEl.innerText = term;
+            playBtn.disabled = true;
+            stopMusic();
+
+            try {
+                // Add timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                
+                // 1. Search KR Store (Primary)
+                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1&_=${timestamp}`);
+                let data = await response.json();
+
+                // 2. Fallback to US Store
+                if (data.resultCount === 0) {
+                     response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1&_=${timestamp}`);
+                     data = await response.json();
+                }
+
+                if (data.resultCount > 0) {
+                    const track = data.results[0];
+                    titleEl.innerText = track.trackName;
+                    artistEl.innerText = track.artistName;
+                    
+                    let previewUrl = track.previewUrl;
+                    if(previewUrl && previewUrl.startsWith('http:')) {
+                        previewUrl = previewUrl.replace('http:', 'https:');
+                    }
+                    audioPlayer.src = previewUrl;
+                    audioPlayer.volume = 0.5;
+                    // Mobile: Do not call .load() automatically to avoid policy blocks
+                    // Just set src is enough
+                    
+                    if(track.artworkUrl100) {
+                        let artUrl = track.artworkUrl100.replace('100x100', '300x300');
+                        if(artUrl.startsWith('http:')) artUrl = artUrl.replace('http:', 'https:');
+                        albumArt.src = artUrl;
+                        albumArt.classList.remove('hidden');
+                        albumPlaceholder.classList.add('hidden');
+                        albumBg.style.backgroundImage = `url(${artUrl})`;
+                    }
+                    playBtn.disabled = false;
+                } else {
+                    throw new Error("No results");
+                }
+            } catch (error) {
+                console.error("Music fetch error:", error);
+                titleEl.innerText = "음악 정보 없음";
+                artistEl.innerText = term;
+                // Keep button disabled
+            }
+        }
+
         window.toggleMusic = function() {
             const playIcon = document.getElementById('icon-play');
             const pauseIcon = document.getElementById('icon-pause');
             const equalizer = document.getElementById('equalizer');
 
             if (audioPlayer.paused) {
-                // Promise based play for debugging
-                const playPromise = audioPlayer.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        playIcon.classList.add('hidden');
-                        pauseIcon.classList.remove('hidden');
-                        equalizer.classList.remove('opacity-0');
-                        equalizer.classList.remove('paused');
-                    })
-                    .catch(error => {
-                        console.log("Play error:", error);
-                        alert("음악을 재생할 수 없습니다.");
-                    });
-                }
+                audioPlayer.play().then(() => {
+                    playIcon.classList.add('hidden');
+                    pauseIcon.classList.remove('hidden');
+                    equalizer.classList.remove('opacity-0');
+                    equalizer.classList.remove('paused');
+                }).catch(e => {
+                    alert("재생할 수 없습니다. (모바일 데이터/권한 확인)");
+                });
             } else {
                 audioPlayer.pause();
                 playIcon.classList.remove('hidden');
