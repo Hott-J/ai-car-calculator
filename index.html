@@ -9,8 +9,6 @@
     <meta property="og:description" content="나의 성향을 분석해 가장 잘 어울리는 자동차를 추천해드립니다.">
     <meta property="og:image" content="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop">
     
-    <!-- Chosen Palette: Toss Blue Theme -->
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
@@ -153,7 +151,6 @@
                     <button id="start-btn" class="btn-press w-full bg-[#3182F6] text-white py-4 rounded-2xl text-xl font-bold shadow-lg shadow-blue-200 min-h-[60px]">
                         테스트 시작하기
                     </button>
-                    <!-- Simulated Global Count -->
                     <p class="text-xs text-gray-400">
                         현재 <span id="participant-count" class="font-bold text-[#3182F6]">1,204</span>명이 참여했어요
                     </p>
@@ -162,7 +159,6 @@
 
             <!-- VIEW 2: QUIZ -->
             <section id="quiz-view" class="hidden p-6 flex flex-col h-full relative">
-                <!-- Back Button -->
                 <div class="w-full flex items-center mb-4 min-h-[40px]">
                     <button id="prev-btn" class="hidden text-gray-400 hover:text-gray-600 flex items-center text-sm font-medium transition-colors p-2 -ml-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -280,14 +276,12 @@
     </main>
 
     <script>
-        // --- 1. Simulated Global Count ---
         function updateSimulatedCount() {
             const startDate = new Date('2025-01-01T00:00:00').getTime();
             const now = new Date().getTime();
             const baseCount = 1204;
             const increaseFactor = Math.floor((now - startDate) / 30000); 
             const totalCount = baseCount + increaseFactor;
-            
             const countEl = document.getElementById('participant-count');
             if (countEl) {
                 countEl.innerText = totalCount.toLocaleString();
@@ -296,8 +290,6 @@
         updateSimulatedCount();
         setInterval(updateSimulatedCount, 10000);
 
-
-        // --- 2. Data ---
         const questions = [
             {
                 id: 1,
@@ -498,30 +490,17 @@
         let finalResultId = null; 
         const audioPlayer = document.getElementById('bgm-player');
 
-        // --- 3. Core Functions ---
-
-        // IMPORTANT: Restart Quiz Logic (Fixed for robustness)
         function restartQuiz() {
-            // 1. UI Transition First (Priority: Immediate Feedback)
             document.getElementById('result-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.add('hidden');
             document.getElementById('intro-view').classList.remove('hidden');
-            
-            // Scroll to top
             window.scrollTo(0, 0);
-
-            // 2. Reset Data
             currentQuestion = 0;
             scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
             history = [];
             finalResultId = null;
-
-            // 3. Stop Music
             stopMusic();
-
-            // 4. URL Clean (Safe Mode with Try-Catch)
             try {
-                // remove query params cleanly
                 const cleanUrl = window.location.pathname; 
                 window.history.pushState({}, document.title, cleanUrl);
             } catch (e) {
@@ -534,12 +513,9 @@
             const quizView = document.getElementById('quiz-view');
             quizView.classList.remove('hidden');
             quizView.classList.add('flex');
-            
-            // Reset question just in case
             currentQuestion = 0;
             scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
             history = [];
-            
             renderQuestion();
             stopMusic();
         }
@@ -549,26 +525,21 @@
                 showLoading();
                 return;
             }
-
             const prevBtn = document.getElementById('prev-btn');
             if (currentQuestion > 0) {
                 prevBtn.classList.remove('hidden');
             } else {
                 prevBtn.classList.add('hidden');
             }
-
             const q = questions[currentQuestion];
             const qNumber = document.getElementById('q-number');
             const qText = document.getElementById('q-text');
             const progressBar = document.getElementById('progress-bar');
             const optionsContainer = document.getElementById('options-container');
-
             qNumber.innerText = `Q${q.id}.`;
             qText.innerText = q.text;
-            
             const progress = ((currentQuestion + 1) / questions.length) * 100;
             progressBar.style.width = `${progress}%`;
-
             optionsContainer.innerHTML = '';
             q.options.forEach(opt => {
                 const btn = document.createElement('button');
@@ -604,21 +575,13 @@
             const loadingView = document.getElementById('loading-view');
             loadingView.classList.remove('hidden');
             loadingView.classList.add('flex');
-
-            const texts = [
-                "인스타그램 분위기 스캔 중...",
-                "평소 운전 습관 분석 중...",
-                "선호하는 디자인 패턴 매칭...",
-                "당신을 위한 최적의 엔진 찾는 중..."
-            ];
-            
+            const texts = ["인스타그램 분위기 스캔 중...", "평소 운전 습관 분석 중...", "선호하는 디자인 패턴 매칭...", "당신을 위한 최적의 엔진 찾는 중..."];
             const loadingText = document.getElementById('loading-text');
             let i = 0;
             const interval = setInterval(() => {
                 loadingText.innerText = texts[i % texts.length];
                 i++;
             }, 800);
-
             setTimeout(() => {
                 clearInterval(interval);
                 calculateAndShowResult();
@@ -628,34 +591,24 @@
         function calculateAndShowResult() {
             document.getElementById('loading-view').classList.add('hidden');
             document.getElementById('result-view').classList.remove('hidden');
-            
             let maxTrait = 'P';
             let maxScore = -1;
             for (const [trait, score] of Object.entries(scores)) {
-                if (score > maxScore) {
-                    maxScore = score;
-                    maxTrait = trait;
-                }
+                if (score > maxScore) { maxScore = score; maxTrait = trait; }
             }
-
             let candidates = carResults.filter(c => c.type === maxTrait);
-            
             const sortedTraits = Object.entries(scores).sort((a,b) => b[1] - a[1]);
             let secondaryTrait = sortedTraits.length > 1 ? sortedTraits[1][0] : '';
-
             let finalCar = candidates.find(c => c.secondary === secondaryTrait) || candidates[0];
             if (!finalCar) finalCar = carResults[0];
-
             renderResultData(finalCar);
         }
 
         function renderResultData(carData) {
             finalResultId = carData.id; 
-
             document.getElementById('result-name').innerText = carData.name;
             document.getElementById('result-icon').innerText = carData.icon;
             document.getElementById('result-desc').innerText = carData.desc;
-            
             const tagsContainer = document.getElementById('result-tags');
             tagsContainer.innerHTML = '';
             carData.tags.forEach(tag => {
@@ -664,7 +617,6 @@
                 span.innerText = tag;
                 tagsContainer.appendChild(span);
             });
-
             renderChart(carData.stats);
             searchMusicPreview(carData.music);
         }
@@ -675,7 +627,6 @@
             if (chartStatus != undefined) {
                 chartStatus.destroy();
             }
-
             const ctx = canvas.getContext('2d');
             new Chart(ctx, {
                 type: 'radar',
@@ -715,7 +666,6 @@
             });
         }
 
-        // --- Music Player Logic ---
         async function searchMusicPreview(term) {
             const titleEl = document.getElementById('music-title');
             const artistEl = document.getElementById('music-artist');
@@ -730,11 +680,15 @@
             stopMusic();
 
             try {
-                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1`);
+                // 1. Clean Term: Remove hyphens for better matching
+                const cleanTerm = term.replace(/ - /g, ' ');
+                
+                // 2. Add explicit=Yes for censored content
+                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanTerm)}&country=KR&media=music&entity=song&limit=1&explicit=Yes`);
                 let data = await response.json();
 
                 if (data.resultCount === 0) {
-                     response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1`);
+                     response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanTerm)}&country=US&media=music&entity=song&limit=1&explicit=Yes`);
                      data = await response.json();
                 }
 
@@ -742,7 +696,6 @@
                     const track = data.results[0];
                     titleEl.innerText = track.trackName;
                     artistEl.innerText = track.artistName;
-                    
                     let previewUrl = track.previewUrl;
                     if(previewUrl && previewUrl.startsWith('http:')) {
                         previewUrl = previewUrl.replace('http:', 'https:');
@@ -764,8 +717,10 @@
                 }
             } catch (error) {
                 console.error("Music fetch error:", error);
+                // Keep the text but disable play to not scare user
                 titleEl.innerText = term;
-                artistEl.innerText = "음악 정보 로딩 실패";
+                artistEl.innerText = "";
+                playBtn.disabled = true;
             }
         }
 
@@ -802,8 +757,6 @@
 
         audioPlayer.addEventListener('ended', () => { stopMusic(); });
 
-
-        // --- Share Function ---
         function shareResult() {
             const baseUrl = window.location.href.split('?')[0];
             const shareUrl = `${baseUrl}?result=${finalResultId}`;
@@ -846,12 +799,9 @@
             setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-
-        // --- Init Logic ---
         function checkUrlForSharedResult() {
             const urlParams = new URLSearchParams(window.location.search);
             const resultId = urlParams.get('result');
-
             if (resultId) {
                 const sharedCar = carResults.find(c => c.id === resultId);
                 if (sharedCar) {
@@ -866,7 +816,6 @@
 
         checkUrlForSharedResult();
 
-        // Event Listeners (Added for robustness)
         const startBtn = document.getElementById('start-btn');
         if (startBtn) startBtn.addEventListener('click', startQuiz);
 
