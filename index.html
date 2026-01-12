@@ -494,6 +494,36 @@
             },
             {
                 id: 12,
+                text: "당신의 첫차(혹은 꿈꾸는 첫차)는 어떤 의미인가요?",
+                options: [
+                    { text: "나의 사회적 위치를 보여주는 명함", scores: { L: 3, S: 1 } },
+                    { text: "어디든 데려다줄 든든한 다리", scores: { P: 3, A: 1 } },
+                    { text: "이동 시간이 즐거운 첨단 장난감", scores: { E: 3, C: 1 } },
+                    { text: "누구에게도 방해받지 않는 독립 공간", scores: { C: 4, L: 1 } }
+                ]
+            },
+            {
+                id: 13,
+                text: "주유소(혹은 충전소)에 들렀을 때 당신의 습관은?",
+                options: [
+                    { text: "기왕 왔으니 세차까지 풀코스로", scores: { L: 2, C: 2 } },
+                    { text: "가장 저렴한 곳을 찾아다니는 연비왕", scores: { P: 4, E: 1 } },
+                    { text: "엔진 첨가제까지 넣으며 관리함", scores: { S: 3, P: 1 } },
+                    { text: "충전하며 뉴스나 기술 정보를 살핌", scores: { E: 4 } }
+                ]
+            },
+            {
+                id: 14,
+                text: "차에 탔을 때 느껴지는 가장 선호하는 향기는?",
+                options: [
+                    { text: "고급 가죽과 새 차 특유의 냄새", scores: { L: 4, C: 1 } },
+                    { text: "자연의 숲속을 닮은 우디한 향", scores: { A: 3, C: 2 } },
+                    { text: "인공적인 향 없는 무취의 깔끔함", scores: { E: 3, P: 1 } },
+                    { text: "기분 전환되는 상큼한 시트러스 향", scores: { S: 2, C: 3 } }
+                ]
+            },
+            {
+                id: 15,
                 text: "마지막 질문! 자동차는 나에게 ___ 이다.",
                 options: [
                     { text: "나를 표현하는 패션 아이템", scores: { L: 3, S: 1, C: 3 } },
@@ -927,30 +957,30 @@
         // Calculate user's normalized profile from quiz scores
         function calculateUserProfile() {
             // Updated maxScore for 12 questions (approx. 28-30 reachable)
-            const maxScore = 28;
+            const traitMaxes = { S: 33, L: 40, P: 38, E: 38, A: 29, C: 36 };
             const userProfile = {};
             const traits = ['S', 'L', 'P', 'E', 'A', 'C'];
 
             for (const trait of traits) {
                 const rawScore = scores[trait] || 0;
-                let normalized = rawScore / maxScore;
+                let normalized = rawScore / traitMaxes[trait];
 
                 // Diversity Patch v4.0: Non-linear Contrast Enhancement
                 // Pushes values away from the 0.5 (average) to make profiles more distinct
-                const k = 1.4;
+                const k = 1.5;
                 normalized = Math.pow(normalized, k) / (Math.pow(normalized, k) + Math.pow(1 - normalized, k));
 
                 userProfile[trait] = Math.min(100, Math.round(normalized * 100));
             }
 
-            console.log('[Analysis] User Profile (Enhanced):', userProfile);
+            console.log('[Analysis] v5.0 User Profile:', userProfile);
             return userProfile;
         }
 
         // Calculate matching score with Top-2 weight optimization
         function calculateMatchScore(userProfile, carIdealProfile) {
             const traits = ['S', 'L', 'P', 'E', 'A', 'C'];
-            let weightedDiff = 0;
+            let weightedPenalty = 0;
             let totalWeight = 0;
 
             // Sort traits by user score to find Top-1 and Top-2
@@ -961,17 +991,20 @@
             for (const trait of traits) {
                 const diff = Math.abs((userProfile[trait] || 0) - (carIdealProfile[trait] || 0));
 
-                // Weighting logic: Top-1 (2.5x), Top-2 (1.5x), Others (1.0x)
-                let weight = 1.0;
-                if (trait === top1) weight = 2.5;
-                else if (trait === top2) weight = 1.5;
+                // Entropy Engine: Quadratic Penalty (diff^1.25)
+                const penalty = Math.pow(diff, 1.25);
 
-                weightedDiff += (diff * weight);
+                let weight = 1.0;
+                if (trait === top1) weight = 2.8;
+                else if (trait === top2) weight = 1.6;
+
+                weightedPenalty += (penalty * weight);
                 totalWeight += weight;
             }
 
-            const avgDiff = weightedDiff / totalWeight;
-            const matchScore = Math.max(0, 100 - avgDiff);
+            const avgPenalty = weightedPenalty / totalWeight;
+            // Match score starts at 100 and drops non-linearly
+            const matchScore = Math.max(0, 100 - (avgPenalty * 1.5));
             return Math.round(matchScore);
         }
 
@@ -987,17 +1020,16 @@
             // Sort by score descending (Diversity Patch v4.0)
             allMatches.sort((a, b) => b.matchScore - a.matchScore);
 
-            // Stochastic Selection: Identify candidates within a 2.5% margin of the best score
-            const MARGIN = 2.5;
+            // Stochastic Selection v5.0: MARGIN 4.0%
+            const MARGIN = 4.0;
             const bestScore = allMatches[0].matchScore;
             const candidates = allMatches.filter(m => (bestScore - m.matchScore) <= MARGIN);
-
-            // Select one randomly from the candidate group to ensure result diversity
+            
+            // Randomly select one to break repetitive results
             const selected = candidates[Math.floor(Math.random() * candidates.length)];
-
-            console.log('[Analysis] Best score:', bestScore, '| Candidates:', candidates.length);
-            console.log('[Analysis] All Match Scores:', allMatches.map(m => ({ name: m.car.name, score: m.matchScore })));
-            console.log('[Analysis] Selected Match:', selected.car.name, 'with', selected.matchScore, '%');
+            
+            console.log('[Analysis] v5.0 Entropy Balanced | Candidates:', candidates.length);
+            console.log('[Analysis] Winner:', selected.car.name);
 
             return { car: selected.car, matchScore: selected.matchScore, userProfile };
         }
