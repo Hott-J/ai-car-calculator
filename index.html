@@ -29,6 +29,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
+    <!-- Eruda: Mobile Developer Console (Remove in production) -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        // Only enable Eruda on mobile devices or when URL has ?debug parameter
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const hasDebugParam = window.location.search.includes('debug');
+        if (isMobile || hasDebugParam) {
+            eruda.init();
+            console.log('📱 Eruda mobile console initialized');
+        }
+    </script>
+
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
