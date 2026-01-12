@@ -932,12 +932,18 @@
             const traits = ['S', 'L', 'P', 'E', 'A', 'C'];
 
             for (const trait of traits) {
-                const score = scores[trait] || 0;
-                // Normalize to 0-100 scale, capping at 100
-                userProfile[trait] = Math.min(100, Math.round((score / maxScore) * 100));
+                const rawScore = scores[trait] || 0;
+                let normalized = rawScore / maxScore;
+
+                // Diversity Patch v4.0: Non-linear Contrast Enhancement
+                // Pushes values away from the 0.5 (average) to make profiles more distinct
+                const k = 1.4;
+                normalized = Math.pow(normalized, k) / (Math.pow(normalized, k) + Math.pow(1 - normalized, k));
+
+                userProfile[trait] = Math.min(100, Math.round(normalized * 100));
             }
 
-            console.log('[Analysis] User Profile:', userProfile);
+            console.log('[Analysis] User Profile (Enhanced):', userProfile);
             return userProfile;
         }
 
@@ -971,24 +977,29 @@
 
         // Find best matching car for user
         function findBestMatch(userProfile) {
-            let bestMatch = null;
-            let bestScore = -1;
             let allMatches = [];
 
             for (const car of carResults) {
                 const matchScore = calculateMatchScore(userProfile, car.idealProfile);
                 allMatches.push({ car, matchScore });
-
-                if (matchScore > bestScore) {
-                    bestScore = matchScore;
-                    bestMatch = { car, matchScore, userProfile };
-                }
             }
 
-            console.log('[Analysis] All Match Scores:', allMatches.map(m => ({ name: m.car.name, score: m.matchScore })));
-            console.log('[Analysis] Best Match:', bestMatch.car.name, 'with', bestMatch.matchScore, '%');
+            // Sort by score descending (Diversity Patch v4.0)
+            allMatches.sort((a, b) => b.matchScore - a.matchScore);
 
-            return bestMatch;
+            // Stochastic Selection: Identify candidates within a 2.5% margin of the best score
+            const MARGIN = 2.5;
+            const bestScore = allMatches[0].matchScore;
+            const candidates = allMatches.filter(m => (bestScore - m.matchScore) <= MARGIN);
+
+            // Select one randomly from the candidate group to ensure result diversity
+            const selected = candidates[Math.floor(Math.random() * candidates.length)];
+
+            console.log('[Analysis] Best score:', bestScore, '| Candidates:', candidates.length);
+            console.log('[Analysis] All Match Scores:', allMatches.map(m => ({ name: m.car.name, score: m.matchScore })));
+            console.log('[Analysis] Selected Match:', selected.car.name, 'with', selected.matchScore, '%');
+
+            return { car: selected.car, matchScore: selected.matchScore, userProfile };
         }
 
         function calculateAndShowResult() {
