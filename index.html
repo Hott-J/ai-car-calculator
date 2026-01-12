@@ -757,7 +757,7 @@
             });
         }
 
-        // --- Music Logic (Enhanced with Mobile Support) ---
+        // --- Music Logic (JSONP for Mobile CORS Fix) ---
         async function searchMusicPreview(term, retryCount = 0) {
             const titleEl = document.getElementById('music-title');
             const artistEl = document.getElementById('music-artist');
@@ -771,35 +771,48 @@
             playBtn.disabled = true;
             stopMusic();
 
-            // Fetch with timeout helper
-            const fetchWithTimeout = (url, timeout = 10000) => {
-                return Promise.race([
-                    fetch(url),
-                    new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Request timeout')), timeout)
-                    )
-                ]);
+            // JSONP helper to bypass CORS on mobile
+            const fetchJSONP = (url) => {
+                return new Promise((resolve, reject) => {
+                    const callbackName = 'iTunesCallback_' + Date.now();
+                    const timeout = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('Request timeout'));
+                    }, 10000);
+
+                    const cleanup = () => {
+                        clearTimeout(timeout);
+                        delete window[callbackName];
+                        if (script && script.parentNode) {
+                            script.parentNode.removeChild(script);
+                        }
+                    };
+
+                    window[callbackName] = (data) => {
+                        cleanup();
+                        resolve(data);
+                    };
+
+                    const script = document.createElement('script');
+                    script.src = url + '&callback=' + callbackName;
+                    script.onerror = () => {
+                        cleanup();
+                        reject(new Error('Script load failed'));
+                    };
+                    document.head.appendChild(script);
+                });
             };
 
             try {
-                // Add timestamp to prevent caching
                 const timestamp = new Date().getTime();
                 let data = null;
-                let response = null;
 
-                // 1. Try KR Store (Primary)
+                // 1. Try KR Store (Primary) with JSONP
                 try {
                     console.log(`[Music] Searching KR store for: ${term}`);
-                    response = await fetchWithTimeout(
-                        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1&_=${timestamp}`,
-                        10000
+                    data = await fetchJSONP(
+                        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1&_=${timestamp}`
                     );
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-
-                    data = await response.json();
                     console.log(`[Music] KR store results:`, data.resultCount);
                 } catch (krError) {
                     console.warn(`[Music] KR store failed:`, krError.message);
@@ -809,16 +822,9 @@
                 if (!data || data.resultCount === 0) {
                     try {
                         console.log(`[Music] Trying US store for: ${term}`);
-                        response = await fetchWithTimeout(
-                            `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1&_=${timestamp}`,
-                            10000
+                        data = await fetchJSONP(
+                            `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1&_=${timestamp}`
                         );
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-
-                        data = await response.json();
                         console.log(`[Music] US store results:`, data.resultCount);
                     } catch (usError) {
                         console.warn(`[Music] US store failed:`, usError.message);
@@ -876,7 +882,7 @@
                 if (error.message.includes('timeout')) {
                     titleEl.innerText = "로딩 시간 초과";
                     artistEl.innerText = "네트워크를 확인해주세요";
-                } else if (error.message.includes('Failed to fetch')) {
+                } else if (error.message.includes('Failed to fetch') || error.message.includes('Load failed')) {
                     titleEl.innerText = "네트워크 오류";
                     artistEl.innerText = "인터넷 연결을 확인해주세요";
                 } else {
