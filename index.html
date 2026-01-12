@@ -966,9 +966,8 @@
                 const rawScore = scores[trait] || 0;
                 let normalized = rawScore / traitMaxes[trait];
 
-                // Diversity Patch v4.0: Non-linear Contrast Enhancement
-                // Pushes values away from the 0.5 (average) to make profiles more distinct
-                const k = 1.5;
+                // Entropy Enhancement v5.1: Non-linear Contrast (Push values from average)
+                const k = 1.7;
                 normalized = Math.pow(normalized, k) / (Math.pow(normalized, k) + Math.pow(1 - normalized, k));
 
                 userProfile[trait] = Math.min(100, Math.round(normalized * 100));
@@ -992,8 +991,8 @@
             for (const trait of traits) {
                 const diff = Math.abs((userProfile[trait] || 0) - (carIdealProfile[trait] || 0));
 
-                // Entropy Engine: Quadratic Penalty (diff^1.25)
-                const penalty = Math.pow(diff, 1.25);
+                // Entropy Engine v5.1: Sharp Quadratic Penalty (diff^1.4)
+                const penalty = Math.pow(diff, 1.4);
 
                 let weight = 1.0;
                 if (trait === top1) weight = 2.8;
@@ -1004,8 +1003,8 @@
             }
 
             const avgPenalty = weightedPenalty / totalWeight;
-            // Match score starts at 100 and drops non-linearly (Corrected multiplier for 0% bug)
-            const matchScore = Math.max(0, 100 - (avgPenalty * 0.45));
+            // Match score starts at 100 and drops non-linearly (v5.1 Balanced Multiplier)
+            const matchScore = Math.max(0, 100 - (avgPenalty * 0.75));
             return Math.round(matchScore);
         }
 
