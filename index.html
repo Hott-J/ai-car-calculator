@@ -634,6 +634,7 @@
         let scores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
         let history = [];
         let finalResultId = null;
+        let currentUserProfile = null; // Store for sharing
         const audioPlayer = document.getElementById('bgm-player');
 
         function restartQuiz() {
@@ -797,10 +798,10 @@
             document.getElementById('result-view').classList.remove('hidden');
 
             // Calculate user's personality profile
-            const userProfile = calculateUserProfile();
+            currentUserProfile = calculateUserProfile();
 
             // Find best matching car
-            const bestMatch = findBestMatch(userProfile);
+            const bestMatch = findBestMatch(currentUserProfile);
 
             // Render result with match data
             renderResultData(bestMatch);
@@ -1100,32 +1101,26 @@
 
         audioPlayer.addEventListener('ended', () => { stopMusic(); });
 
-        function encodeAnswers() {
-            // Encode history indices (10 numbers between 0-3) into a simple 10-char string
-            return history.join('');
+        function encodeProfile(profile) {
+            // Encode S, L, P, E, A scores (0-100) into a hex string
+            const traits = ['S', 'L', 'P', 'E', 'A'];
+            return traits.map(t => (profile[t] || 0).toString(16).padStart(2, '0')).join('');
         }
 
-        function decodeAnswers(ansStr) {
-            const decodedScores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
-            const decodedHistory = [];
-
-            for (let i = 0; i < ansStr.length && i < questions.length; i++) {
-                const optIdx = parseInt(ansStr[i]);
-                if (isNaN(optIdx)) continue;
-
-                const points = questions[i].options[optIdx].scores;
-                decodedHistory.push(optIdx);
-                for (const key in points) {
-                    if (decodedScores[key] !== undefined) decodedScores[key] += points[key];
-                }
+        function decodeProfile(pStr) {
+            if (!pStr || pStr.length !== 10) return null;
+            const traits = ['S', 'L', 'P', 'E', 'A'];
+            const profile = {};
+            for (let i = 0; i < traits.length; i++) {
+                profile[traits[i]] = parseInt(pStr.substr(i * 2, 2), 16);
             }
-            return { decodedScores, decodedHistory };
+            return profile;
         }
 
         function shareResult() {
             const baseUrl = window.location.href.split('?')[0];
-            const ansStr = encodeAnswers();
-            const shareUrl = `${baseUrl}?ans=${ansStr}`;
+            const pStr = encodeProfile(currentUserProfile);
+            const shareUrl = `${baseUrl}?p=${pStr}`;
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             if (isMobile && navigator.share) {
@@ -1167,41 +1162,65 @@
 
         function checkUrlForSharedResult() {
             const urlParams = new URLSearchParams(window.location.search);
+            const pStr = urlParams.get('p');
             const ansStr = urlParams.get('ans');
             const resultId = urlParams.get('result');
 
+            if (pStr) {
+                const userProfile = decodeProfile(pStr);
+                if (userProfile) {
+                    currentUserProfile = userProfile;
+                    const bestMatch = findBestMatch(userProfile);
+                    renderReconstructedView(bestMatch);
+                    return;
+                }
+            }
+
             if (ansStr && ansStr.length >= questions.length) {
-                // New logic: Reconstruct scores from answers
+                // Compatibility for old ans parameter
                 const { decodedScores, decodedHistory } = decodeAnswers(ansStr);
                 scores = decodedScores;
                 history = decodedHistory;
-
-                const userProfile = calculateUserProfile();
-                const bestMatch = findBestMatch(userProfile);
-
-                document.getElementById('intro-view').classList.add('hidden');
-                document.getElementById('result-view').classList.remove('hidden');
-                const restartBtn = document.getElementById('restart-btn');
-                restartBtn.innerText = "나도 테스트하기";
-                renderResultData(bestMatch);
+                currentUserProfile = calculateUserProfile();
+                const bestMatch = findBestMatch(currentUserProfile);
+                renderReconstructedView(bestMatch);
                 return;
             }
 
             if (resultId) {
-                // Backwards compatibility for old result parameter
+                // Compatibility for oldest result parameter
                 const car = carResults.find(c => c.id === resultId);
                 if (car) {
-                    // Create a dummy profile for old links (mid-range matching)
-                    const userProfile = { ...car.idealProfile };
-                    const bestMatch = { car, matchScore: 92, userProfile };
-
-                    document.getElementById('intro-view').classList.add('hidden');
-                    document.getElementById('result-view').classList.remove('hidden');
-                    const restartBtn = document.getElementById('restart-btn');
-                    restartBtn.innerText = "나도 테스트하기";
-                    renderResultData(bestMatch);
+                    currentUserProfile = { ...car.idealProfile };
+                    const bestMatch = { car, matchScore: 92, userProfile: currentUserProfile };
+                    renderReconstructedView(bestMatch);
                 }
             }
+        }
+
+        function renderReconstructedView(bestMatch) {
+            document.getElementById('intro-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            const restartBtn = document.getElementById('restart-btn');
+            restartBtn.innerText = "나도 테스트하기";
+            renderResultData(bestMatch);
+        }
+
+        function decodeAnswers(ansStr) {
+            const decodedScores = { S: 0, L: 0, P: 0, E: 0, A: 0 };
+            const decodedHistory = [];
+
+            for (let i = 0; i < ansStr.length && i < questions.length; i++) {
+                const optIdx = parseInt(ansStr[i]);
+                if (isNaN(optIdx)) continue;
+
+                const points = questions[i].options[optIdx].scores;
+                decodedHistory.push(optIdx);
+                for (const key in points) {
+                    if (decodedScores[key] !== undefined) decodedScores[key] += points[key];
+                }
+            }
+            return { decodedScores, decodedHistory };
         }
 
         checkUrlForSharedResult();
