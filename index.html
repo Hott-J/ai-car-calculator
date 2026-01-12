@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>운명적 자동차 테스트 | 성향 분석</title>
-    <meta name="description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요. 평소 생활 습관과 성격을 분석해 가장 어울리는 자동차를 추천해드립니다.">
+    <title>자동차 MBTI 테스트 - 나의 운명적인 차 찾기 | CAR MBTI</title>
+    <meta name="description"
+        content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요. MBTI 기반 정밀 성향 분석을 통해 가장 어울리는 자동차와 드라이빙 음악을 추천해드립니다.">
+    <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- SEO Meta Tags -->
     <link rel="canonical" href="https://www.car-agent.co.kr/">
@@ -16,15 +18,15 @@
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.car-agent.co.kr/">
-    <meta property="og:title" content="운명적 자동차 테스트 | 성향 분석">
-    <meta property="og:description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요.">
+    <meta property="og:title" content="자동차 MBTI 테스트 - 나의 운명적인 차 찾기 | CAR MBTI">
+    <meta property="og:description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요. 정밀 성향 분석 결과 확인하기.">
     <meta property="og:site_name" content="CAR MBTI">
     <meta property="og:locale" content="ko_KR">
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="운명적 자동차 테스트 | 성향 분석">
-    <meta name="twitter:description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요.">
+    <meta name="twitter:title" content="자동차 MBTI 테스트 - 나의 운명적인 차 찾기 | CAR MBTI">
+    <meta name="twitter:description" content="나의 성격과 라이프스타일에 딱 맞는 자동차를 찾아보세요. 정밀 성향 분석 결과 확인하기.">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -422,12 +424,12 @@
             },
             {
                 id: 5,
-                text: "인스타그램에 사진을 올린다면?",
+                text: "나의 자동차 라이프를 공유한다면?",
                 options: [
-                    { text: "명품, 오마카세 등 화려한 일상", scores: { L: 3 } },
-                    { text: "운동, 바디프로필, 러닝 기록", scores: { S: 2, A: 2 } },
-                    { text: "감성적인 풍경이나 카페", scores: { P: 1, L: 1 } },
-                    { text: "잘 안 올리거나 눈팅만 함", scores: { P: 2, E: 2 } }
+                    { text: "화려한 도심의 야경과 럭셔리함", scores: { L: 3 } },
+                    { text: "거친 오프로드와 액티브한 순간", scores: { S: 2, A: 2 } },
+                    { text: "감성적인 캠핑과 평온한 풍경", scores: { P: 1, L: 1 } },
+                    { text: "내 차의 정교한 기계적 디테일", scores: { P: 2, E: 2 } }
                 ]
             },
             {
@@ -853,17 +855,17 @@
             const loadingView = document.getElementById('loading-view');
             loadingView.classList.remove('hidden');
             loadingView.classList.add('flex');
-            const texts = ["인스타그램 분위기 스캔 중...", "평소 운전 습관 분석 중...", "선호하는 디자인 패턴 매칭...", "당신을 위한 최적의 엔진 찾는 중..."];
+            const texts = ["나의 드라이빙 페르소나 분석 중...", "평소 주행 습관 데이터 매칭 중...", "나에게 가장 어울리는 엔진 찾는 중...", "운명적인 자동차와 동기화 중..."];
             const loadingText = document.getElementById('loading-text');
             let i = 0;
             const interval = setInterval(() => {
                 loadingText.innerText = texts[i % texts.length];
                 i++;
-            }, 800);
+            }, 500);
             setTimeout(() => {
                 clearInterval(interval);
                 calculateAndShowResult();
-            }, 3000);
+            }, 1800);
         }
 
         // === Dynamic Result Analysis System ===
