@@ -745,8 +745,8 @@
             });
         }
 
-        // --- Music Logic (Improved) ---
-        async function searchMusicPreview(term) {
+        // --- Music Logic (Enhanced with Mobile Support) ---
+        async function searchMusicPreview(term, retryCount = 0) {
             const titleEl = document.getElementById('music-title');
             const artistEl = document.getElementById('music-artist');
             const playBtn = document.getElementById('play-btn');
@@ -759,51 +759,120 @@
             playBtn.disabled = true;
             stopMusic();
 
+            // Fetch with timeout helper
+            const fetchWithTimeout = (url, timeout = 10000) => {
+                return Promise.race([
+                    fetch(url),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Request timeout')), timeout)
+                    )
+                ]);
+            };
+
             try {
                 // Add timestamp to prevent caching
                 const timestamp = new Date().getTime();
+                let data = null;
+                let response = null;
 
-                // 1. Search KR Store (Primary)
-                let response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1&_=${timestamp}`);
-                let data = await response.json();
+                // 1. Try KR Store (Primary)
+                try {
+                    console.log(`[Music] Searching KR store for: ${term}`);
+                    response = await fetchWithTimeout(
+                        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=KR&media=music&entity=song&limit=1&_=${timestamp}`,
+                        10000
+                    );
 
-                // 2. Fallback to US Store
-                if (data.resultCount === 0) {
-                    response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1&_=${timestamp}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
                     data = await response.json();
+                    console.log(`[Music] KR store results:`, data.resultCount);
+                } catch (krError) {
+                    console.warn(`[Music] KR store failed:`, krError.message);
                 }
 
-                if (data.resultCount > 0) {
+                // 2. Fallback to US Store if KR failed or no results
+                if (!data || data.resultCount === 0) {
+                    try {
+                        console.log(`[Music] Trying US store for: ${term}`);
+                        response = await fetchWithTimeout(
+                            `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=US&media=music&entity=song&limit=1&_=${timestamp}`,
+                            10000
+                        );
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+
+                        data = await response.json();
+                        console.log(`[Music] US store results:`, data.resultCount);
+                    } catch (usError) {
+                        console.warn(`[Music] US store failed:`, usError.message);
+                    }
+                }
+
+                // 3. Process results if found
+                if (data && data.resultCount > 0) {
                     const track = data.results[0];
+                    console.log(`[Music] Found track:`, track.trackName, 'by', track.artistName);
+
                     titleEl.innerText = track.trackName;
                     artistEl.innerText = track.artistName;
 
+                    // Handle preview URL
                     let previewUrl = track.previewUrl;
-                    if (previewUrl && previewUrl.startsWith('http:')) {
-                        previewUrl = previewUrl.replace('http:', 'https:');
+                    if (previewUrl) {
+                        if (previewUrl.startsWith('http:')) {
+                            previewUrl = previewUrl.replace('http:', 'https:');
+                        }
+                        audioPlayer.src = previewUrl;
+                        audioPlayer.volume = 0.5;
+                        console.log(`[Music] Preview URL set:`, previewUrl);
+                    } else {
+                        console.warn(`[Music] No preview URL available`);
                     }
-                    audioPlayer.src = previewUrl;
-                    audioPlayer.volume = 0.5;
-                    // Mobile: Do not call .load() automatically to avoid policy blocks
-                    // Just set src is enough
 
+                    // Handle artwork
                     if (track.artworkUrl100) {
                         let artUrl = track.artworkUrl100.replace('100x100', '300x300');
-                        if (artUrl.startsWith('http:')) artUrl = artUrl.replace('http:', 'https:');
+                        if (artUrl.startsWith('http:')) {
+                            artUrl = artUrl.replace('http:', 'https:');
+                        }
                         albumArt.src = artUrl;
                         albumArt.classList.remove('hidden');
                         albumPlaceholder.classList.add('hidden');
                         albumBg.style.backgroundImage = `url(${artUrl})`;
+                        console.log(`[Music] Artwork loaded`);
                     }
+
                     playBtn.disabled = false;
                 } else {
-                    throw new Error("No results");
+                    // No results found - retry once if this is first attempt
+                    if (retryCount < 1) {
+                        console.log(`[Music] No results, retrying... (attempt ${retryCount + 1})`);
+                        setTimeout(() => searchMusicPreview(term, retryCount + 1), 2000);
+                        return;
+                    }
+                    throw new Error("No results found after retry");
                 }
             } catch (error) {
-                console.error("Music fetch error:", error);
-                titleEl.innerText = "음악 정보 없음";
-                artistEl.innerText = term;
-                // Keep button disabled
+                console.error(`[Music] Final error:`, error.message, error);
+
+                // Show user-friendly error message
+                if (error.message.includes('timeout')) {
+                    titleEl.innerText = "로딩 시간 초과";
+                    artistEl.innerText = "네트워크를 확인해주세요";
+                } else if (error.message.includes('Failed to fetch')) {
+                    titleEl.innerText = "네트워크 오류";
+                    artistEl.innerText = "인터넷 연결을 확인해주세요";
+                } else {
+                    titleEl.innerText = "음악 정보 없음";
+                    artistEl.innerText = term;
+                }
+
+                playBtn.disabled = true;
             }
         }
 
