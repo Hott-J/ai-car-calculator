@@ -98,7 +98,8 @@
             width: 100%;
             max-width: 400px;
             margin: 0 auto;
-            height: 300px;
+            height: 360px;
+            /* Increased from 300px for better visibility */
         }
 
         .no-scrollbar::-webkit-scrollbar {
@@ -1003,8 +1004,8 @@
             }
 
             const avgPenalty = weightedPenalty / totalWeight;
-            // Match score starts at 100 and drops non-linearly
-            const matchScore = Math.max(0, 100 - (avgPenalty * 1.5));
+            // Match score starts at 100 and drops non-linearly (Corrected multiplier for 0% bug)
+            const matchScore = Math.max(0, 100 - (avgPenalty * 0.45));
             return Math.round(matchScore);
         }
 
@@ -1024,10 +1025,10 @@
             const MARGIN = 4.0;
             const bestScore = allMatches[0].matchScore;
             const candidates = allMatches.filter(m => (bestScore - m.matchScore) <= MARGIN);
-            
+
             // Randomly select one to break repetitive results
             const selected = candidates[Math.floor(Math.random() * candidates.length)];
-            
+
             console.log('[Analysis] v5.0 Entropy Balanced | Candidates:', candidates.length);
             console.log('[Analysis] Winner:', selected.car.name);
 
@@ -1113,21 +1114,40 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    elements: { line: { borderWidth: 3 } },
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10,
+                            left: 10,
+                            right: 10
+                        }
+                    },
+                    elements: {
+                        line: { borderWidth: 4, tension: 0.1 },
+                        point: { radius: 3, hitRadius: 10 }
+                    },
                     scales: {
                         r: {
-                            angleLines: { display: true, color: '#E5E7EB' },
-                            grid: { color: '#E5E7EB' },
+                            angleLines: { display: true, color: '#E2E8F0' },
+                            grid: { color: '#E2E8F0' },
                             pointLabels: {
-                                font: { size: 12, family: "'Pretendard', sans-serif", weight: 'bold' },
-                                color: '#4B5563'
+                                font: {
+                                    size: 14,
+                                    family: "'Pretendard', sans-serif",
+                                    weight: '800' // Stronger weight for visibility
+                                },
+                                color: '#1E293B',
+                                padding: 15
                             },
                             suggestedMin: 0,
                             suggestedMax: 100,
                             ticks: { display: false }
                         }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    }
                 }
             });
         }
