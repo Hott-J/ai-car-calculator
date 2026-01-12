@@ -482,7 +482,7 @@
             }
         ];
 
-        // Music Data: Artist + Title only
+        // Music Data with fallback info for mobile
         const carResults = [
             {
                 id: "porsche911",
@@ -493,6 +493,12 @@
                 desc: "멈추지 않는 심장! 목표를 향해 직진하는 열정적인 레이서 타입입니다. 스릴을 즐기는 당신에게 어울리는 최고의 드림카입니다.",
                 tags: ["#스피드광", "#자기관리", "#성공의아이콘"],
                 music: "aespa Supernova",
+                musicData: {
+                    trackName: "Supernova",
+                    artistName: "aespa",
+                    previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/af/59/c4/af59c4e4-3782-ea53-11a9-7dc942c9c932/mzaf_3358240220343184467.plus.aac.p.m4a",
+                    artworkUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2b/9b/4e/2b9b4ef2-85f3-1880-934f-9a45f8480cfb/888735947483.png/300x300bb.jpg"
+                },
                 stats: [90, 80, 40, 30, 60]
             },
             {
@@ -504,6 +510,12 @@
                 desc: "품격과 여유를 중요시하는 도시의 리더입니다. 정돈된 편안함과 주변을 챙기는 리더십을 가진 당신에게 어울립니다.",
                 tags: ["#회장님포스", "#편안함", "#섬세함"],
                 music: "BIBI Bam Yang Gang",
+                musicData: {
+                    trackName: "밤양갱",
+                    artistName: "BIBI",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [40, 95, 70, 50, 20]
             },
             {
@@ -515,6 +527,12 @@
                 desc: "효율과 혁신을 사랑하는 스마트 얼리어답터! 복잡한 것보다는 심플하고 합리적인 최첨단 라이프를 추구합니다.",
                 tags: ["#미니멀리즘", "#테크충", "#효율중시"],
                 music: "TWS plot twist",
+                musicData: {
+                    trackName: "plot twist",
+                    artistName: "TWS",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [60, 50, 70, 95, 40]
             },
             {
@@ -526,6 +544,12 @@
                 desc: "내 사람을 지키는 든든한 수호자. 화려함보다는 내실과 안전을 최우선으로 생각하는 신중한 타입입니다.",
                 tags: ["#안전제일", "#패밀리맨", "#북유럽감성"],
                 music: "DAY6 Welcome to the Show",
+                musicData: {
+                    trackName: "Welcome to the Show",
+                    artistName: "DAY6",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [40, 60, 95, 60, 50]
             },
             {
@@ -537,6 +561,12 @@
                 desc: "자유로운 영혼의 모험가! 정해진 길보다는 내가 가는 길이 곧 길이라고 믿는 거침없는 성격입니다.",
                 tags: ["#캠핑", "#오프로드", "#마이웨이"],
                 music: "(G)I-DLE Fate",
+                musicData: {
+                    trackName: "Fate",
+                    artistName: "(G)I-DLE",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [60, 40, 50, 30, 95]
             },
             {
@@ -548,6 +578,12 @@
                 desc: "트렌드와 스타일을 놓치지 않는 힙스터! 친환경도 중요하지만, 스타일이 안 나는 건 용서할 수 없습니다.",
                 tags: ["#영앤리치", "#트렌드세터", "#친환경간지"],
                 music: "NewJeans How Sweet",
+                musicData: {
+                    trackName: "How Sweet",
+                    artistName: "NewJeans",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [80, 90, 40, 85, 30]
             },
             {
@@ -559,6 +595,12 @@
                 desc: "일상 속의 짜릿한 일탈을 꿈꾸는 현실적 쾌락주의자! 평범해 보이지만 알고 보면 누구보다 뜨거운 열정을 가졌습니다.",
                 tags: ["#가성비", "#팝콘배기음", "#반전매력"],
                 music: "ZICO SPOT!",
+                musicData: {
+                    trackName: "SPOT!",
+                    artistName: "ZICO",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [85, 30, 70, 40, 50]
             },
             {
@@ -570,6 +612,12 @@
                 desc: "실속을 챙기는 공간 마법사! 남들의 시선보다는 나만의 실용성과 활용도를 중요하게 생각하는 알짜배기입니다.",
                 tags: ["#차박", "#실용주의", "#경차혜택"],
                 music: "QWER T.B.H",
+                musicData: {
+                    trackName: "T.B.H",
+                    artistName: "QWER",
+                    previewUrl: null,
+                    artworkUrl: null
+                },
                 stats: [20, 20, 90, 70, 60]
             }
         ];
@@ -709,7 +757,7 @@
                 tagsContainer.appendChild(span);
             });
             renderChart(carData.stats);
-            searchMusicPreview(carData.music);
+            searchMusicPreview(carData);
         }
 
         function renderChart(statsData) {
@@ -757,8 +805,8 @@
             });
         }
 
-        // --- Music Logic (JSONP for Mobile CORS Fix) ---
-        async function searchMusicPreview(term, retryCount = 0) {
+        // --- Music Logic (Fallback-first approach for mobile) ---
+        async function searchMusicPreview(carData) {
             const titleEl = document.getElementById('music-title');
             const artistEl = document.getElementById('music-artist');
             const playBtn = document.getElementById('play-btn');
@@ -767,10 +815,56 @@
             const albumPlaceholder = document.getElementById('album-placeholder');
 
             titleEl.innerText = "음악 로딩 중...";
-            artistEl.innerText = term;
+            artistEl.innerText = carData.music;
             playBtn.disabled = true;
             stopMusic();
 
+            // Use fallback data first if available
+            if (carData.musicData) {
+                console.log(`[Music] Using fallback data for: ${carData.music}`);
+
+                titleEl.innerText = carData.musicData.trackName;
+                artistEl.innerText = carData.musicData.artistName;
+
+                if (carData.musicData.previewUrl) {
+                    audioPlayer.src = carData.musicData.previewUrl;
+                    audioPlayer.volume = 0.5;
+                    playBtn.disabled = false;
+                    console.log(`[Music] Preview URL set from fallback`);
+                } else {
+                    console.log(`[Music] No preview URL in fallback data`);
+                }
+
+                if (carData.musicData.artworkUrl) {
+                    albumArt.src = carData.musicData.artworkUrl;
+                    albumArt.classList.remove('hidden');
+                    albumPlaceholder.classList.add('hidden');
+                    albumBg.style.backgroundImage = `url(${carData.musicData.artworkUrl})`;
+                    console.log(`[Music] Artwork loaded from fallback`);
+                }
+
+                // Try to enhance with iTunes API data in background (optional)
+                tryEnhanceWithAPI(carData.music, titleEl, artistEl, playBtn, albumArt, albumBg, albumPlaceholder);
+                return;
+            }
+
+            // If no fallback data, try iTunes API
+            console.log(`[Music] No fallback data, trying iTunes API for: ${carData.music}`);
+            await fetchFromiTunesAPI(carData.music, titleEl, artistEl, playBtn, albumArt, albumBg, albumPlaceholder);
+        }
+
+        // Optional: Try to enhance with iTunes API (non-blocking)
+        async function tryEnhanceWithAPI(term, titleEl, artistEl, playBtn, albumArt, albumBg, albumPlaceholder) {
+            try {
+                console.log(`[Music] Attempting to enhance with iTunes API...`);
+                const data = await fetchFromiTunesAPI(term, titleEl, artistEl, playBtn, albumArt, albumBg, albumPlaceholder, true);
+            } catch (error) {
+                console.log(`[Music] API enhancement failed (using fallback):`, error.message);
+            }
+        }
+
+        // iTunes API fetch function
+        async function fetchFromiTunesAPI(term, titleEl, artistEl, playBtn, albumArt, albumBg, albumPlaceholder, isEnhancement = false) {
             // JSONP helper to bypass CORS on mobile
             const fetchJSONP = (url) => {
                 return new Promise((resolve, reject) => {
@@ -847,6 +941,7 @@
                         }
                         audioPlayer.src = previewUrl;
                         audioPlayer.volume = 0.5;
+                        playBtn.disabled = false;
                         console.log(`[Music] Preview URL set:`, previewUrl);
                     } else {
                         console.warn(`[Music] No preview URL available`);
@@ -864,33 +959,27 @@
                         albumBg.style.backgroundImage = `url(${artUrl})`;
                         console.log(`[Music] Artwork loaded`);
                     }
-
-                    playBtn.disabled = false;
                 } else {
-                    // No results found - retry once if this is first attempt
-                    if (retryCount < 1) {
-                        console.log(`[Music] No results, retrying... (attempt ${retryCount + 1})`);
-                        setTimeout(() => searchMusicPreview(term, retryCount + 1), 2000);
-                        return;
-                    }
-                    throw new Error("No results found after retry");
+                    throw new Error("No results found");
                 }
             } catch (error) {
-                console.error(`[Music] Final error:`, error.message, error);
+                console.error(`[Music] API error:`, error.message);
 
-                // Show user-friendly error message
-                if (error.message.includes('timeout')) {
-                    titleEl.innerText = "로딩 시간 초과";
-                    artistEl.innerText = "네트워크를 확인해주세요";
-                } else if (error.message.includes('Failed to fetch') || error.message.includes('Load failed')) {
-                    titleEl.innerText = "네트워크 오류";
-                    artistEl.innerText = "인터넷 연결을 확인해주세요";
-                } else {
-                    titleEl.innerText = "음악 정보 없음";
-                    artistEl.innerText = term;
+                // Only show error if this is not an enhancement attempt
+                if (!isEnhancement) {
+                    if (error.message.includes('timeout')) {
+                        titleEl.innerText = "로딩 시간 초과";
+                        artistEl.innerText = "네트워크를 확인해주세요";
+                    } else if (error.message.includes('Failed to fetch') || error.message.includes('Load failed') || error.message.includes('Script load failed')) {
+                        titleEl.innerText = "음악 정보 없음";
+                        artistEl.innerText = term;
+                    } else {
+                        titleEl.innerText = "음악 정보 없음";
+                        artistEl.innerText = term;
+                    }
+                    playBtn.disabled = true;
                 }
-
-                playBtn.disabled = true;
+                throw error;
             }
         }
 
